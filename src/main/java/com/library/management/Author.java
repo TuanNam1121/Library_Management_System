@@ -1,4 +1,4 @@
-package com.library.management.entities;
+package com.library.management;
 
 import jakarta.persistence.*;
 import lombok.Getter;

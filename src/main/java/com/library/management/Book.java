@@ -1,4 +1,4 @@
-package com.library.management.entities;
+package com.library.management;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -39,13 +39,17 @@ public class Book {
     @Column(name = "AvailableQuantity", nullable = false)
     private Integer availableQuantity;
 
+    @ColumnDefault("0")
+    @Column(name = "ReservedQuantity", nullable = false)
+    private Integer reservedQuantity;
+
     @Nationalized
     @Column(name = "CoverImage")
     private String coverImage;
 
-    @ColumnDefault("0")
+    @ColumnDefault("1")
     @Column(name = "Status", nullable = false)
-    private Boolean status = false;
+    private Integer status;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "AuthorId", nullable = false)

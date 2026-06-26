@@ -1,4 +1,4 @@
-package com.library.management.entities;
+package com.library.management;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -34,6 +34,10 @@ public class User {
     @Nationalized
     @Column(name = "Address")
     private String address;
+
+    @Nationalized
+    @Column(name = "AvatarImage")
+    private String avatarImage;
 
     @ColumnDefault("1")
     @Column(name = "Role", nullable = false)

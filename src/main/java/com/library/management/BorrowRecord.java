@@ -1,4 +1,4 @@
-package com.library.management.entities;
+package com.library.management;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -22,6 +22,10 @@ public class BorrowRecord {
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "RequestId", nullable = false)
     private BorrowRequest request;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ProcessedBy")
+    private User processedBy;
 
     @Column(name = "BorrowDate", nullable = false)
     private LocalDate borrowDate;

@@ -1,42 +1,43 @@
-package com.library.management.entities;
+package com.library.management;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
-import java.time.LocalDate;
+import java.time.Instant;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "BorrowRecordDetails")
-public class BorrowRecordDetail {
+@Table(name = "Reservations")
+public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "DetailId", nullable = false)
+    @Column(name = "ReservationId", nullable = false)
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "RecordId", nullable = false)
-    private BorrowRecord record;
+    @JoinColumn(name = "ReaderId", nullable = false)
+    private User reader;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "BookId", nullable = false)
     private Book book;
 
-    @Column(name = "Quantity", nullable = false)
-    private Integer quantity;
+    @ColumnDefault("getdate()")
+    @Column(name = "ReservedAt")
+    private Instant reservedAt;
 
-    @ColumnDefault("0")
-    @Column(name = "ReturnedQuantity")
-    private Integer returnedQuantity;
-
-    @Column(name = "ReturnDate")
-    private LocalDate returnDate;
+    @Column(name = "ExpireAt", nullable = false)
+    private Instant expireAt;
 
     @ColumnDefault("1")
     @Column(name = "Status", nullable = false)
     private Integer status;
+
+    @ColumnDefault("getdate()")
+    @Column(name = "CreatedAt")
+    private Instant createdAt;
 
 }
