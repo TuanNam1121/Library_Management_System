@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/common :: head(title='Categories List - LibraryHub', description='Manage book categories')}"></th:block>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Inter', sans-serif;
+        }
+        .main-container {
+            margin-top: 3rem;
+            margin-bottom: 5rem;
+            min-height: 60vh;
+        }
+        .custom-card {
+            border: none;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+        .custom-card-header {
+            background-color: #ffffff;
+            border-bottom: 1px solid #edf2f7;
+            padding: 1.5rem;
+        }
+        .btn-custom-add {
+            background-color: #10b981;
+            color: white;
+            font-weight: 500;
+            padding: 0.5rem 1.25rem;
+            border-radius: 0.5rem;
+            border: none;
+            transition: all 0.2s;
+        }
+        .btn-custom-add:hover {
+            background-color: #059669;
+            color: white;
+            transform: translateY(-1px);
+        }
+        .table > :not(caption) > * > * {
+            padding: 1rem 1.5rem;
+            vertical-align: middle;
+        }
+        .table th {
+            font-weight: 600;
+            color: #4b5563;
+            background-color: #f9fafb;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav th:replace="~{fragments/common :: navbar}"></nav>
+
+<!-- ===== MAIN CONTENT ===== -->
+<main class="container main-container">
+    <!-- Success Alert -->
+    <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <strong>🎉 Success!</strong> A new category has been added to the list.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="card custom-card">
+        <div class="custom-card-header d-flex justify-content-between align-items-center flex-wrap">
+            <div>
+                <h2 class="h4 mb-1 fw-bold text-dark">Book Categories</h2>
+                <p class="text-muted mb-0 small">Manage and track existing book categories in the system</p>
+            </div>
+            <!-- Add Category Button -->
+            <a th:href="@{/categories/create}" class="btn btn-custom-add mt-2 mt-md-0">
+                ➕ Add New Category
+            </a>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width: 10%;">ID</th>
+                            <th style="width: 35%;">Category Name</th>
+                            <th style="width: 40%;">Description</th>
+                            <th style="width: 15%;" class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Categories List -->
+                        <tr th:each="cat : ${categories}">
+                            <td class="fw-semibold text-secondary" th:text="${cat.id}">1</td>
+                            <td class="fw-bold text-dark" th:text="${cat.name}">Category Name</td>
+                            <td class="text-muted" th:text="${cat.description ?: 'No description available'}">Description details</td>
+                            <td class="text-center">
+                                <a th:href="@{/books(categoryId=${cat.id})}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                    📚 View Books
+                                </a>
+                            </td>
+                        </tr>
+                        <!-- Empty State -->
+                        <tr th:if="${#lists.isEmpty(categories)}">
+                            <td colspan="4" class="text-center py-5">
+                                <div class="text-muted mb-2">📂 No book categories found in the system</div>
+                                <a th:href="@{/categories/create}" class="btn btn-sm btn-primary mt-2">Create first category</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer th:replace="~{fragments/common :: footer}"></footer>
+
+<!-- Bootstrap 5 JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
