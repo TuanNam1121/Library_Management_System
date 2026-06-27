@@ -46,7 +46,4 @@ public class Book extends BaseEntity{
 
     private LocalDateTime approvedAt;
 
-    private Boolean deleted = false;
-
-
 }

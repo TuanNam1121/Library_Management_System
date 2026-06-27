@@ -1,10 +1,195 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head(title='Tìm kiếm sách - LibraryHub', description='Tìm kiếm sách trong thư viện theo tên, tác giả, thể loại')}"></head>
 <body>
-    <h1>đã view ok</h1>
+
+<!-- ===== NAVBAR ===== -->
+<nav th:replace="~{fragments/common :: navbar}"></nav>
+
+<!-- ===== HERO / SEARCH ===== -->
+<section class="hero-section">
+    <div class="container" style="position: relative; z-index: 1;">
+        <h1 class="hero-title">Khám phá <span>kho tri thức</span> của bạn</h1>
+        <p class="hero-subtitle">Tìm kiếm hàng nghìn đầu sách theo tiêu đề, tác giả và thể loại</p>
+
+        <!-- UC02: Search Form -->
+        <form th:action="@{/books}" method="get" id="searchForm" class="search-form-wrapper">
+            <div class="search-row">
+                <!-- Keyword search -->
+                <input
+                    id="keywordInput"
+                    type="text"
+                    name="keyword"
+                    class="search-input"
+                    placeholder="Tìm theo tên sách..."
+                    th:value="${searchDTO.keyword}"
+                    autocomplete="off"
+                />
+
+                <!-- Category filter -->
+                <select id="categorySelect" name="categoryId" class="search-select">
+                    <option value="0">Thể loại</option>
+                    <option
+                        th:each="cat : ${categories}"
+                        th:value="${cat.id}"
+                        th:text="${cat.name}"
+                        th:selected="${searchDTO.categoryId != null and searchDTO.categoryId == cat.id}"
+                    >Thể loại</option>
+                </select>
+
+                <!-- Author filter -->
+                <select id="authorSelect" name="authorId" class="search-select">
+                    <option value="0">Tác giả</option>
+                    <option
+                        th:each="auth : ${authors}"
+                        th:value="${auth.id}"
+                        th:text="${auth.name}"
+                        th:selected="${searchDTO.authorId != null and searchDTO.authorId == auth.id}"
+                    >Tác giả</option>
+                </select>
+
+                <!-- Hidden page reset -->
+                <input type="hidden" name="page" value="0"/>
+                <input type="hidden" name="size" th:value="${searchDTO.size ?: 9}"/>
+
+                <button id="searchBtn" type="submit" class="btn btn-primary">
+                    Tìm kiếm
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- ===== RESULTS ===== -->
+<main class="section-wrapper">
+    <div class="container">
+
+        <!-- Active filters display -->
+        <div class="filter-tags" th:if="${searchDTO.keyword != null and !#strings.isEmpty(searchDTO.keyword)
+                                          or (searchDTO.categoryId != null and searchDTO.categoryId > 0)
+                                          or (searchDTO.authorId != null and searchDTO.authorId > 0)}">
+            <span style="font-size:0.8rem;color:var(--text-muted);align-self:center;">Lọc theo:</span>
+            <span class="filter-tag" th:if="${searchDTO.keyword != null and !#strings.isEmpty(searchDTO.keyword)}">
+                📝 "<span th:text="${searchDTO.keyword}"></span>"
+                <a th:href="@{/books(categoryId=${searchDTO.categoryId},authorId=${searchDTO.authorId})}">✕</a>
+            </span>
+            <span class="filter-tag" th:if="${searchDTO.categoryId != null and searchDTO.categoryId > 0}">
+                📂 <span th:each="cat : ${categories}" th:if="${cat.id == searchDTO.categoryId}" th:text="${cat.name}"></span>
+                <a th:href="@{/books(keyword=${searchDTO.keyword},authorId=${searchDTO.authorId})}">✕</a>
+            </span>
+            <span class="filter-tag" th:if="${searchDTO.authorId != null and searchDTO.authorId > 0}">
+                ✍️ <span th:each="auth : ${authors}" th:if="${auth.id == searchDTO.authorId}" th:text="${auth.name}"></span>
+                <a th:href="@{/books(keyword=${searchDTO.keyword},categoryId=${searchDTO.categoryId})}">✕</a>
+            </span>
+        </div>
+
+        <!-- Results meta info -->
+        <div class="results-meta">
+            <div class="results-count">
+                Hiển thị
+                <strong th:text="${books.size()}">0</strong>
+                /
+                <strong th:text="${totalItems}">0</strong>
+                kết quả
+            </div>
+            <div style="font-size:0.8rem; color:var(--text-muted);" th:if="${totalPages > 1}">
+                Trang <strong th:text="${currentPage + 1}">1</strong> / <strong th:text="${totalPages}">1</strong>
+            </div>
+        </div>
+
+        <!-- ---- BOOK GRID ---- -->
+        <div class="books-grid" th:if="${not #lists.isEmpty(books)}">
+            <a th:each="book : ${books}"
+               th:href="@{/books/{id}(id=${book.id})}"
+               class="book-card"
+               th:title="${book.title}">
+
+                <!-- Cover image -->
+                <img th:if="${book.coverImage != null and !#strings.isEmpty(book.coverImage)}"
+                     th:src="@{${book.coverImage}}"
+                     th:alt="${book.title}"
+                     class="book-cover"
+                     loading="lazy"/>
+
+                <!-- Placeholder when no image -->
+                <div th:unless="${book.coverImage != null and !#strings.isEmpty(book.coverImage)}"
+                     class="book-cover-placeholder">
+                    📖
+                    <span>Không có ảnh</span>
+                </div>
+
+                <!-- Card body -->
+                <div class="book-card-body">
+                    <div class="book-card-title" th:text="${book.title}">Tên sách</div>
+                    <div class="book-card-author" th:text="${book.authorName ?: 'Không rõ tác giả'}">Tác giả</div>
+                    <div class="book-card-category" th:text="${book.categoryName ?: ''}">Thể loại</div>
+
+                    <div class="book-card-footer">
+                        <!-- Availability badge -->
+                        <span class="availability-badge"
+                              th:classappend="${(book.availableQuantity != null and book.availableQuantity > 0) ? 'badge-available' : 'badge-unavailable'}">
+                            <span class="badge-dot"></span>
+                            <span th:if="${book.availableQuantity != null and book.availableQuantity > 0}"
+                                  th:text="'Còn ' + ${book.availableQuantity} + ' cuốn'">Còn sách</span>
+                            <span th:unless="${book.availableQuantity != null and book.availableQuantity > 0}">Hết sách</span>
+                        </span>
+
+                        <span style="font-size:0.75rem;color:var(--text-muted);">Chi tiết →</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- ---- EMPTY STATE ---- -->
+        <div class="empty-state" th:if="${#lists.isEmpty(books)}">
+            <div class="empty-state-icon">🔍</div>
+            <h3>Không tìm thấy sách nào</h3>
+            <p>Thử thay đổi từ khóa hoặc bộ lọc để tìm kiếm lại</p>
+            <a th:href="@{/books}" class="btn btn-outline" style="margin-top:1.5rem;">Xem tất cả sách</a>
+        </div>
+
+        <!-- ---- PAGINATION ---- -->
+        <div class="pagination-wrapper" th:if="${totalPages > 1}">
+
+            <!-- First & Prev -->
+            <a class="page-btn"
+               th:classappend="${currentPage == 0 ? ' disabled' : ''}"
+               th:href="@{/books(keyword=${searchDTO.keyword},categoryId=${searchDTO.categoryId},authorId=${searchDTO.authorId},page=0,size=${searchDTO.size})}"
+               title="Trang đầu">«</a>
+
+            <a class="page-btn"
+               th:classappend="${currentPage == 0 ? ' disabled' : ''}"
+               th:href="@{/books(keyword=${searchDTO.keyword},categoryId=${searchDTO.categoryId},authorId=${searchDTO.authorId},page=${currentPage - 1},size=${searchDTO.size})}"
+               title="Trang trước">‹</a>
+
+            <!-- Page numbers (show range around current) -->
+            <th:block th:with="
+                startPage=${T(java.lang.Math).max(0, currentPage - 2)},
+                endPage=${T(java.lang.Math).min(totalPages - 1, currentPage + 2)}">
+                <a th:each="i : ${#numbers.sequence(startPage, endPage)}"
+                   th:href="@{/books(keyword=${searchDTO.keyword},categoryId=${searchDTO.categoryId},authorId=${searchDTO.authorId},page=${i},size=${searchDTO.size})}"
+                   class="page-btn"
+                   th:classappend="${i == currentPage ? ' active' : ''}"
+                   th:text="${i + 1}">1</a>
+            </th:block>
+
+            <!-- Next & Last -->
+            <a class="page-btn"
+               th:classappend="${currentPage == totalPages - 1 ? ' disabled' : ''}"
+               th:href="@{/books(keyword=${searchDTO.keyword},categoryId=${searchDTO.categoryId},authorId=${searchDTO.authorId},page=${currentPage + 1},size=${searchDTO.size})}"
+               title="Trang sau">›</a>
+
+            <a class="page-btn"
+               th:classappend="${currentPage == totalPages - 1 ? ' disabled' : ''}"
+               th:href="@{/books(keyword=${searchDTO.keyword},categoryId=${searchDTO.categoryId},authorId=${searchDTO.authorId},page=${totalPages - 1},size=${searchDTO.size})}"
+               title="Trang cuối">»</a>
+        </div>
+
+    </div>
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer th:replace="~{fragments/common :: footer}"></footer>
+
 </body>
 </html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:replace="${pageTitle} ?: 'Library Management'">Library</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/library.css}"/>
+    <th:block th:replace="${extraHead}"></th:block>
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav class="navbar">
+    <div class="container navbar-inner">
+        <a class="brand" th:href="@{/books}">
+            <span class="brand-icon">📚</span>
+            <span class="brand-text">LibraryHub</span>
+        </a>
+        <div class="nav-links">
+            <a class="nav-link" th:href="@{/books}">Tìm sách</a>
+            <a class="nav-link" href="#">Lịch sử mượn</a>
+            <a class="nav-link" href="#">Thông báo</a>
+        </div>
+        <div class="nav-actions">
+            <a class="btn btn-primary" href="#">View My Profile</a>
+        </div>
+    </div>
+</nav>
+
+<!-- ===== PAGE CONTENT ===== -->
+<main class="page-content" th:replace="${content}">
+    <p>Content goes here</p>
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+    <div class="container">
+        <p>&copy; 2026 LibraryHub - Hệ thống quản lý thư viện trực tuyến</p>
+    </div>
+</footer>
+
+</body>
+</html>
