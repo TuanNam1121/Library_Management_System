@@ -12,15 +12,11 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class Book extends BaseEntity{
-
-
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
 
-
     private String title;
-
 
     private String isbn;
 
@@ -29,40 +25,26 @@ public class Book extends BaseEntity{
     @Column(columnDefinition = "TEXT")
     private String description;
 
-
     private Integer quantity;
-
 
     private Integer availableQuantity;
 
-
-
     @Enumerated(EnumType.STRING)
     private BookStatus status;
-
-
 
     @ManyToOne
     @JoinColumn(name="category_id")
     private Category category;
 
-
-
     @ManyToOne
     @JoinColumn(name="author_id")
     private Author author;
-
-
 
     @ManyToOne
     @JoinColumn(name="approved_by")
     private User approvedBy;
 
-
-
     private LocalDateTime approvedAt;
-
-
 
     private Boolean deleted = false;
 
