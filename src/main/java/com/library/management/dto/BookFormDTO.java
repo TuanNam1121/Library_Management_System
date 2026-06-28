@@ -1,23 +1,18 @@
 package com.library.management.dto;
 
-import com.library.management.enums.BookStatus;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Setter
-public class BookReturnDTO {
-    private Long id;
+public class BookFormDTO {
     private String title;
     private String isbn;
-    private String coverImage;
     private String description;
     private Integer quantity;
     private Integer availableQuantity;
-    private BookStatus status;
     private Long categoryId;
-    private String categoryName;
     private Long authorId;
-    private String authorName;
-    private String authorBio;
+    private MultipartFile coverImageFile;
 }

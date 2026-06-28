@@ -83,6 +83,10 @@
             </span>
         </div>
 
+        <!-- Flash messages -->
+        <div th:if="${successMessage}" style="background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.3);color:#22c55e;padding:0.9rem 1.25rem;border-radius:12px;margin-bottom:1rem;" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" style="background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);color:#ef4444;padding:0.9rem 1.25rem;border-radius:12px;margin-bottom:1rem;" th:text="${errorMessage}"></div>
+
         <!-- Results meta info -->
         <div class="results-meta">
             <div class="results-count">
@@ -92,8 +96,11 @@
                 <strong th:text="${totalItems}">0</strong>
                 kết quả
             </div>
-            <div style="font-size:0.8rem; color:var(--text-muted);" th:if="${totalPages > 1}">
-                Trang <strong th:text="${currentPage + 1}">1</strong> / <strong th:text="${totalPages}">1</strong>
+            <div style="display:flex;align-items:center;gap:1rem;">
+                <div style="font-size:0.8rem; color:var(--text-muted);" th:if="${totalPages > 1}">
+                    Trang <strong th:text="${currentPage + 1}">1</strong> / <strong th:text="${totalPages}">1</strong>
+                </div>
+                <a th:href="@{/books/new}" class="btn btn-primary" id="addBookBtn" style="font-size:0.85rem;padding:0.45rem 1rem;">+ Thêm sách</a>
             </div>
         </div>
 
