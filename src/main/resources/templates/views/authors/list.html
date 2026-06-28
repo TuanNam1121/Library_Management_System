@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head(title='Author Management')}"></head>
+
+<body>
+
+<nav th:replace="~{fragments/common :: navbar}"></nav>
+
+<div class="container mt-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Author Management</h2>
+
+        <a th:href="@{/authors/create}"
+           class="btn btn-primary">
+            + New Author
+        </a>
+    </div>
+
+    <table class="table table-striped table-bordered align-middle">
+
+        <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Biography</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="author : ${authors}">
+            <td th:text="${author.id}"></td>
+            <td th:text="${author.name}"></td>
+            <td th:text="${author.bio}"></td>
+            <td>
+                <a th:href="@{/authors/edit/{id}(id=${author.id})}"
+                   class="btn btn-warning btn-sm">
+                    Edit
+                </a>
+
+                <a th:href="@{/authors/delete/{id}(id=${author.id})}"
+                   class="btn btn-danger btn-sm"
+                   onclick="return confirm('Delete this author?')">
+                    Delete
+                </a>
+            </td>
+        </tr>
+        </tbody>
+
+    </table>
+
+</div>
+
+</body>
+</html>
