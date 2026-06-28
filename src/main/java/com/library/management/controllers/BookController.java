@@ -1,5 +1,6 @@
 package com.library.management.controllers;
 
+import com.library.management.dto.BookFormDTO;
 import com.library.management.dto.BookReturnDTO;
 import com.library.management.dto.BookSearchDTO;
 import com.library.management.entities.Author;
@@ -12,10 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -64,5 +63,79 @@ public class BookController {
         } catch (EntityNotFoundException e) {
             return "redirect:/books?error=notfound";
         }
+    }
+
+    @GetMapping("/new")
+    public String showAddForm(Model model) {
+        if (!model.containsAttribute("form")) {
+            model.addAttribute("form", new BookFormDTO());
+        }
+        model.addAttribute("categories", categoryRepository.findAll());
+        model.addAttribute("authors", authorRepository.findAll());
+        return "books/add";
+    }
+
+    @PostMapping("/new")
+    public String createBook(@ModelAttribute BookFormDTO form, RedirectAttributes ra) {
+        try {
+            BookReturnDTO created = bookService.createBook(form);
+            ra.addFlashAttribute("successMessage", "Đã thêm sách \"" + created.getTitle() + "\" thành công!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", "Lỗi khi thêm sách: " + e.getMessage());
+            ra.addFlashAttribute("form", form);
+            return "redirect:/books/new";
+        }
+        return "redirect:/books";
+    }
+
+    @GetMapping("/{id}/edit")
+    public String showEditForm(@PathVariable Long id, Model model) {
+        try {
+            BookReturnDTO book = bookService.getBookByIdForAdmin(id);
+            if (!model.containsAttribute("form")) {
+                BookFormDTO form = new BookFormDTO();
+                form.setTitle(book.getTitle());
+                form.setIsbn(book.getIsbn());
+                form.setDescription(book.getDescription());
+                form.setQuantity(book.getQuantity());
+                form.setAvailableQuantity(book.getAvailableQuantity());
+                form.setCategoryId(book.getCategoryId());
+                form.setAuthorId(book.getAuthorId());
+                model.addAttribute("form", form);
+            }
+
+            model.addAttribute("book", book);
+            model.addAttribute("categories", categoryRepository.findAll());
+            model.addAttribute("authors", authorRepository.findAll());
+            return "books/edit";
+        } catch (EntityNotFoundException e) {
+            return "redirect:/books?error=notfound";
+        }
+    }
+
+    @PostMapping("/{id}/edit")
+    public String updateBook(@PathVariable Long id, @ModelAttribute BookFormDTO form, RedirectAttributes ra) {
+        try {
+            BookReturnDTO updated = bookService.updateBook(id, form);
+            ra.addFlashAttribute("successMessage", "Đã cập nhật sách \"" + updated.getTitle() + "\"!");
+            return "redirect:/books/" + id;
+        } catch (EntityNotFoundException e) {
+            return "redirect:/books?error=notfound";
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", "Lỗi khi cập nhật: " + e.getMessage());
+            ra.addFlashAttribute("form", form);
+            return "redirect:/books/" + id + "/edit";
+        }
+    }
+
+    @PostMapping("/{id}/delete")
+    public String deleteBook(@PathVariable Long id, RedirectAttributes ra) {
+        try {
+            bookService.deleteBook(id);
+            ra.addFlashAttribute("successMessage", "Đã xóa sách thành công.");
+        } catch (EntityNotFoundException e) {
+            ra.addFlashAttribute("errorMessage", "Không tìm thấy sách.");
+        }
+        return "redirect:/books";
     }
 }

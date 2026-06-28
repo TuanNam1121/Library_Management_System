@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head(title='Thêm sách mới - LibraryHub', description='Thêm sách mới')}"></head>
+<body>
+<nav th:replace="~{fragments/common :: navbar}"></nav>
+
+<main class="page-content">
+    <div class="container" style="max-width:720px; padding-top:2rem; padding-bottom:3rem;">
+
+        <h1 style="font-size:1.6rem; font-weight:700; margin-bottom:1.5rem;">Thêm sách mới</h1>
+
+        <div th:if="${errorMessage}"
+             style="background:rgba(239,68,68,0.1);border:1px solid #ef4444;color:#ef4444;padding:.75rem 1rem;border-radius:8px;margin-bottom:1rem;"
+             th:text="${errorMessage}"></div>
+
+        <form th:action="@{/books/new}" th:object="${form}" method="post" enctype="multipart/form-data">
+
+            <div style="margin-bottom:1rem;">
+                <label>Tên sách *</label><br>
+                <input type="text" th:field="*{title}" style="width:100%;padding:.5rem;" required/>
+            </div>
+
+            <div style="margin-bottom:1rem;">
+                <label>ISBN</label><br>
+                <input type="text" th:field="*{isbn}" style="width:100%;padding:.5rem;"/>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+                <div>
+                    <label>Tác giả</label><br>
+                    <select th:field="*{authorId}" style="width:100%;padding:.5rem;">
+                        <option value="0">-- Chọn tác giả --</option>
+                        <option th:each="a : ${authors}" th:value="${a.id}" th:text="${a.name}"></option>
+                    </select>
+                </div>
+                <div>
+                    <label>Thể loại</label><br>
+                    <select th:field="*{categoryId}" style="width:100%;padding:.5rem;">
+                        <option value="0">-- Chọn thể loại --</option>
+                        <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"></option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+                <div>
+                    <label>Tổng số bản *</label><br>
+                    <input type="number" th:field="*{quantity}" min="0" style="width:100%;padding:.5rem;" required/>
+                </div>
+                <div>
+                    <label>Số bản có thể mượn *</label><br>
+                    <input type="number" th:field="*{availableQuantity}" min="0" style="width:100%;padding:.5rem;" required/>
+                </div>
+            </div>
+
+            <div style="margin-bottom:1rem;">
+                <label>Mô tả</label><br>
+                <textarea th:field="*{description}" rows="4" style="width:100%;padding:.5rem;"></textarea>
+            </div>
+
+            <div style="margin-bottom:1.5rem;">
+                <label>Ảnh bìa sách</label><br>
+                <input type="file" name="coverImageFile" accept="image/*"/>
+            </div>
+
+            <div style="display:flex;gap:.75rem;">
+                <a th:href="@{/books}" style="padding:.5rem 1.25rem;border:1px solid #ccc;border-radius:6px;text-decoration:none;">Hủy</a>
+                <button type="submit" style="padding:.5rem 1.25rem;background:#6366f1;color:white;border:none;border-radius:6px;cursor:pointer;">Thêm sách</button>
+            </div>
+
+        </form>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/common :: footer}"></footer>
+</body>
+</html>
