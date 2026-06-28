@@ -15,24 +15,14 @@ public class Notification extends BaseEntity{
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
 
-
-
     @ManyToOne
     @JoinColumn(name="user_id")
     private User user;
 
-
-
     private String title;
-
-
 
     @Column(columnDefinition = "TEXT")
     private String content;
 
-
-
     private Boolean readStatus = false;
-
-
 }

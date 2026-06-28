@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/common :: head(title='Lịch sử Mượn sách - LibraryHub', description='Xem lịch sử yêu cầu mượn sách và tình trạng mượn')}"></th:block>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <!-- Ensure library.css overrides Bootstrap defaults for dark theme consistency -->
+    <link href="/css/library.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav th:replace="~{fragments/common :: navbar}"></nav>
+
+<!-- ===== HERO BANNER ===== -->
+<section class="hero-section">
+    <div class="container" style="position: relative; z-index: 1;">
+        <h1 class="hero-title">Lịch sử <span>Mượn Sách</span></h1>
+        <p class="hero-subtitle">Theo dõi trạng thái các yêu cầu mượn sách hiện tại và trong quá khứ của bạn</p>
+    </div>
+</section>
+
+<!-- ===== MAIN CONTENT ===== -->
+<main class="page-content">
+    <div class="container py-4">
+        
+        <!-- Requests History Table -->
+        <div class="search-form-wrapper" style="max-width: 1100px; margin: 0 auto; padding: 2rem;">
+            <div class="table-responsive">
+                <table class="table mb-0" style="color: var(--text-primary); border-color: var(--glass-border);">
+                    <thead>
+                        <tr style="border-bottom: 1px solid var(--glass-border);">
+                            <th style="width: 10%; color: var(--text-secondary); border: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Mã Yêu Cầu</th>
+                            <th style="width: 30%; color: var(--text-secondary); border: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Thông tin Sách</th>
+                            <th style="width: 15%; color: var(--text-secondary); border: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Ngày Yêu Cầu</th>
+                            <th style="width: 15%; color: var(--text-secondary); border: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Hạn Trả</th>
+                            <th style="width: 15%; color: var(--text-secondary); border: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Trạng Thái</th>
+                            <th style="width: 15%; color: var(--text-secondary); border: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;" class="text-center">Chi Tiết</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="req : ${requests}" style="border-bottom: 1px solid var(--glass-border); vertical-align: middle;">
+                            <td style="color: var(--text-secondary); border: none;" th:text="${'#' + req.id}">#123</td>
+                            <td style="border: none;">
+                                <div class="d-flex align-items: center; gap-2" th:each="detail : ${req.details}">
+                                    <div>
+                                        <div style="font-weight: 700; color: var(--text-primary);" th:text="${detail.book.title}">Tên sách</div>
+                                        <div style="font-size: 0.8rem; color: var(--text-muted);" th:text="${'Tác giả: ' + detail.book.author.name}">Tác giả</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="color: var(--text-secondary); border: none;" th:text="${#temporals.format(req.requestDate, 'dd/MM/yyyy HH:mm:ss')}">28/06/2026</td>
+                            <td style="color: var(--text-secondary); border: none;">
+                                <span th:each="detail : ${req.details}">
+                                    <span th:text="${detail.dueDate != null ? #temporals.format(detail.dueDate, 'dd/MM/yyyy HH:mm:ss') : '—'}">—</span>
+                                </span>
+                            </td>
+                            <td style="border: none;">
+                                <span th:if="${req.status == T(com.library.management.enums.BorrowStatus).PENDING}"
+                                      style="color: var(--accent-warning); background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600;">
+                                    Đang chờ duyệt
+                                </span>
+                                <span th:if="${req.status == T(com.library.management.enums.BorrowStatus).APPROVED}"
+                                      style="color: var(--accent-success); background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600;">
+                                    Đã duyệt
+                                </span>
+                                <span th:if="${req.status == T(com.library.management.enums.BorrowStatus).REJECTED}"
+                                      style="color: var(--accent-danger); background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600;">
+                                    Đã từ chối
+                                </span>
+                                <span th:if="${req.status == T(com.library.management.enums.BorrowStatus).RETURNED}"
+                                      style="color: #60a5fa; background: rgba(96,165,250,0.15); border: 1px solid rgba(96,165,250,0.3); padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600;">
+                                    Đã trả sách
+                                </span>
+                            </td>
+                            <td class="text-center" style="border: none;">
+                                <a th:href="@{/borrows/{id}(id=${req.id})}" class="btn btn-outline btn-sm">
+                                    🔍 Xem
+                                </a>
+                            </td>
+                        </tr>
+                        <!-- Empty State -->
+                        <tr th:if="${#lists.isEmpty(requests)}">
+                            <td colspan="6" class="text-center py-5" style="border: none;">
+                                <div class="empty-state" style="padding: 2rem 1rem;">
+                                    <div class="empty-state-icon" style="font-size: 2.5rem;">📋</div>
+                                    <h3 style="margin-top: 1rem;">Chưa có yêu cầu mượn sách nào</h3>
+                                    <p style="color: var(--text-secondary);">Bạn có thể tìm kiếm sách và gửi yêu cầu mượn ngay.</p>
+                                    <a th:href="@{/books}" class="btn btn-primary" style="margin-top: 1.5rem;">Tìm sách ngay</a>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer th:replace="~{fragments/common :: footer}"></footer>
+
+<!-- Bootstrap 5 JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+</body>
+</html>

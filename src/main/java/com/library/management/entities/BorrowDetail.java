@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name="borrow_details")
@@ -18,36 +18,22 @@ public class BorrowDetail {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
 
-
-
     @ManyToOne
     @JoinColumn(name="borrow_request_id")
     private BorrowRequest borrowRequest;
-
-
 
     @ManyToOne
     @JoinColumn(name="book_id")
     private Book book;
 
+    private LocalDateTime borrowDate;
 
+    private LocalDateTime dueDate;
 
-    private LocalDate borrowDate;
-
-
-
-    private LocalDate dueDate;
-
-
-
-    private LocalDate returnDate;
-
-
+    private LocalDateTime returnDate;
 
     @Enumerated(EnumType.STRING)
     private BorrowItemStatus status;
-
-
 
     @OneToOne(mappedBy = "borrowDetail",
             cascade = CascadeType.ALL)

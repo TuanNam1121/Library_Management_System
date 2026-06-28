@@ -1,176 +1,186 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/common :: head(title=${book.title + ' - LibraryHub'}, description=${book.description != null ? #strings.abbreviate(book.description, 160) : 'Xem chi tiết sách tại LibraryHub'})}"></head>
+
+<head
+    th:replace="~{fragments/common :: head(title=${book.title + ' - LibraryHub'}, description=${book.description != null ? #strings.abbreviate(book.description, 160) : 'Xem chi tiết sách tại LibraryHub'})}">
+</head>
+
 <body>
 
-<!-- ===== NAVBAR ===== -->
-<nav th:replace="~{fragments/common :: navbar}"></nav>
+    <!-- ===== NAVBAR ===== -->
+    <nav th:replace="~{fragments/common :: navbar}"></nav>
 
-<!-- ===== BOOK DETAIL ===== -->
-<main class="page-content">
-    <section class="detail-section">
-        <div class="container">
+    <!-- ===== BOOK DETAIL ===== -->
+    <main class="page-content">
+        <section class="detail-section">
+            <div class="container">
 
-            <!-- Breadcrumb -->
-            <nav class="detail-breadcrumb" aria-label="Breadcrumb">
-                <a th:href="@{/books}">Tìm sách</a>
-                <span>›</span>
-                <span th:text="${book.categoryName ?: 'Thư viện'}">Thể loại</span>
-                <span>›</span>
-                <span th:text="${book.title}">Tên sách</span>
-            </nav>
-
-            <!-- Detail grid: cover + info -->
-            <div class="detail-grid">
-
-                <!-- LEFT: Cover image -->
-                <div class="detail-cover-wrapper">
-                    <img th:if="${book.coverImage != null and !#strings.isEmpty(book.coverImage)}"
-                         th:src="@{${book.coverImage}}"
-                         th:alt="${book.title}"
-                         class="detail-cover"
-                         id="bookCoverImg"/>
-
-                    <div th:unless="${book.coverImage != null and !#strings.isEmpty(book.coverImage)}"
-                         class="detail-cover-placeholder"
-                         id="bookCoverPlaceholder">
-
-                    </div>
-
-                    <!-- ISBN badge below cover -->
-                    <div style="margin-top: 1rem;">
-                        <span class="isbn-badge" th:if="${book.isbn != null and !#strings.isEmpty(book.isbn)}">
-                            ISBN: <span th:text="${book.isbn}">0000000000</span>
-                        </span>
-                    </div>
+                <!-- Alerts for Borrow Request status -->
+                <div th:if="${param.borrowSuccess}" class="alert" style="background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: var(--accent-success); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem;">
+                    <strong>Thành công!</strong> Đã gửi yêu cầu mượn sách. Vui lòng chờ thủ thư phê duyệt.
+                </div>
+                <div th:if="${param.borrowError}" class="alert" style="background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: var(--accent-danger); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem;">
+                    <strong>Lỗi!</strong> <span th:text="${param.borrowError}">Có lỗi xảy ra khi gửi yêu cầu mượn.</span>
                 </div>
 
-                <!-- RIGHT: Book info -->
-                <div class="detail-info">
+                <!-- Breadcrumb -->
+                <nav class="detail-breadcrumb" aria-label="Breadcrumb">
+                    <a th:href="@{/books}">Tìm sách</a>
+                    <span>›</span>
+                    <span th:text="${book.categoryName ?: 'Thư viện'}">Thể loại</span>
+                    <span>›</span>
+                    <span th:text="${book.title}">Tên sách</span>
+                </nav>
 
-                    <!-- Category tag -->
-                    <div>
-                        <span class="detail-category"
-                              th:text="${book.categoryName ?: 'Chưa phân loại'}"
-                              id="bookCategory">
-                            Thể loại
-                        </span>
-                    </div>
+                <!-- Detail grid: cover + info -->
+                <div class="detail-grid">
 
-                    <!-- Title -->
-                    <h1 class="detail-title" id="bookTitle" th:text="${book.title}">Tên sách</h1>
+                    <!-- LEFT: Cover image -->
+                    <div class="detail-cover-wrapper">
+                        <img th:if="${book.coverImage != null and !#strings.isEmpty(book.coverImage)}"
+                            th:src="@{${book.coverImage}}" th:alt="${book.title}" class="detail-cover"
+                            id="bookCoverImg" />
 
-                    <!-- Author -->
-                    <div class="detail-author" id="bookAuthorSection">
-                        <span style="color:var(--text-muted);">Tác giả:</span>
-                        <span class="detail-author-name" th:text="${book.authorName ?: 'Không rõ'}">Tác giả</span>
-                    </div>
+                        <div th:unless="${book.coverImage != null and !#strings.isEmpty(book.coverImage)}"
+                            class="detail-cover-placeholder" id="bookCoverPlaceholder">
 
-                    <!-- Meta stats -->
-                    <div class="detail-meta-grid" id="bookMetaGrid">
-                        <div class="detail-meta-item">
-                            <div class="detail-meta-value"
-                                 th:text="${book.quantity != null ? book.quantity : '—'}"
-                                 id="bookQuantity">0</div>
-                            <div class="detail-meta-label">Tổng số bản</div>
                         </div>
-                        <div class="detail-meta-item">
-                            <div class="detail-meta-value"
-                                 th:style="${(book.availableQuantity != null and book.availableQuantity > 0) ? 'color: var(--accent-success)' : 'color: var(--accent-danger)'}"
-                                 th:text="${book.availableQuantity != null ? book.availableQuantity : '—'}"
-                                 id="bookAvailableQty">0</div>
-                            <div class="detail-meta-label">Có thể mượn</div>
-                        </div>
-                        <div class="detail-meta-item" th:if="${book.quantity != null and book.availableQuantity != null}">
-                            <div class="detail-meta-value"
-                                 th:text="${book.quantity - book.availableQuantity}"
-                                 id="bookBorrowedQty">0</div>
-                            <div class="detail-meta-label">Đang được mượn</div>
+
+                        <!-- ISBN badge below cover -->
+                        <div style="margin-top: 1rem;">
+                            <span class="isbn-badge" th:if="${book.isbn != null and !#strings.isEmpty(book.isbn)}">
+                                ISBN: <span th:text="${book.isbn}">0000000000</span>
+                            </span>
                         </div>
                     </div>
 
-                    <!-- Availability status block -->
-                    <div class="detail-status-block" id="availabilityBlock">
-                        <div class="detail-availability">
-                            <div class="availability-indicator"
-                                 th:classappend="${(book.availableQuantity != null and book.availableQuantity > 0) ? 'indicator-available' : 'indicator-unavailable'}"
-                                 id="availabilityIndicator">
+                    <!-- RIGHT: Book info -->
+                    <div class="detail-info">
+
+                        <!-- Category tag -->
+                        <div>
+                            <span class="detail-category" th:text="${book.categoryName ?: 'Chưa phân loại'}"
+                                id="bookCategory">
+                                Thể loại
+                            </span>
+                        </div>
+
+                        <!-- Title -->
+                        <h1 class="detail-title" id="bookTitle" th:text="${book.title}">Tên sách</h1>
+
+                        <!-- Author -->
+                        <div class="detail-author" id="bookAuthorSection">
+                            <span style="color:var(--text-muted);">Tác giả:</span>
+                            <span class="detail-author-name" th:text="${book.authorName ?: 'Không rõ'}">Tác giả</span>
+                        </div>
+
+                        <!-- Meta stats -->
+                        <div class="detail-meta-grid" id="bookMetaGrid">
+                            <div class="detail-meta-item">
+                                <div class="detail-meta-value" th:text="${book.quantity != null ? book.quantity : '—'}"
+                                    id="bookQuantity">0</div>
+                                <div class="detail-meta-label">Tổng số bản</div>
                             </div>
+                            <div class="detail-meta-item">
+                                <div class="detail-meta-value"
+                                    th:style="${(book.availableQuantity != null and book.availableQuantity > 0) ? 'color: var(--accent-success)' : 'color: var(--accent-danger)'}"
+                                    th:text="${book.availableQuantity != null ? book.availableQuantity : '—'}"
+                                    id="bookAvailableQty">0</div>
+                                <div class="detail-meta-label">Có thể mượn</div>
+                            </div>
+                            <div class="detail-meta-item"
+                                th:if="${book.quantity != null and book.availableQuantity != null}">
+                                <div class="detail-meta-value" th:text="${book.quantity - book.availableQuantity}"
+                                    id="bookBorrowedQty">0</div>
+                                <div class="detail-meta-label">Đang được mượn</div>
+                            </div>
+                        </div>
+
+                        <!-- Availability status block -->
+                        <div class="detail-status-block" id="availabilityBlock">
+                            <div class="detail-availability">
+                                <div class="availability-indicator"
+                                    th:classappend="${(book.availableQuantity != null and book.availableQuantity > 0) ? 'indicator-available' : 'indicator-unavailable'}"
+                                    id="availabilityIndicator">
+                                </div>
+                                <div>
+                                    <div class="availability-text-label">Tình trạng sách</div>
+                                    <div class="availability-text-value"
+                                        th:classappend="${(book.availableQuantity != null and book.availableQuantity > 0) ? 'text-available' : 'text-unavailable'}"
+                                        id="availabilityText">
+                                        <span th:if="${book.availableQuantity != null and book.availableQuantity > 0}">
+                                            ✅ Có thể mượn ngay
+                                        </span>
+                                        <span
+                                            th:unless="${book.availableQuantity != null and book.availableQuantity > 0}">
+                                            ❌ Hiện đã hết sách
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Borrow request button (UC04) -->
                             <div>
-                                <div class="availability-text-label">Tình trạng sách</div>
-                                <div class="availability-text-value"
-                                     th:classappend="${(book.availableQuantity != null and book.availableQuantity > 0) ? 'text-available' : 'text-unavailable'}"
-                                     id="availabilityText">
-                                    <span th:if="${book.availableQuantity != null and book.availableQuantity > 0}">
-                                        ✅ Có thể mượn ngay
+                                <div th:if="${session.loginUser != null}">
+                                    <form th:if="${session.loginUser.role == 'READER'}" th:action="@{/borrows/request/{bookId}(bookId=${book.id})}" method="POST" style="display: inline;">
+                                        <button id="borrowBtn" type="submit" class="btn btn-success"
+                                            th:disabled="${book.availableQuantity == null or book.availableQuantity <= 0}"
+                                            th:style="${(book.availableQuantity != null and book.availableQuantity > 0) ? '' : 'opacity:0.5;cursor:not-allowed;'}">
+                                            <span th:if="${book.availableQuantity != null and book.availableQuantity > 0}">📋 Gửi yêu cầu mượn</span>
+                                            <span th:unless="${book.availableQuantity != null and book.availableQuantity > 0}">Sách không khả dụng</span>
+                                        </button>
+                                    </form>
+                                    <span th:if="${session.loginUser.role != 'READER'}" class="btn btn-outline" style="opacity:0.6; cursor:default;">
+                                        Dành cho Độc giả
                                     </span>
-                                    <span th:unless="${book.availableQuantity != null and book.availableQuantity > 0}">
-                                        ❌ Hiện đã hết sách
-                                    </span>
+                                </div>
+                                <div th:unless="${session.loginUser != null}">
+                                    <a th:href="@{/auths/login}" class="btn btn-primary">🔑 Đăng nhập để mượn sách</a>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Borrow request button (UC04 - placeholder) -->
-                        <div>
-                            <button
-                                id="borrowBtn"
-                                class="btn btn-success"
-                                th:disabled="${book.availableQuantity == null or book.availableQuantity <= 0}"
-                                th:style="${(book.availableQuantity != null and book.availableQuantity > 0) ? '' : 'opacity:0.5;cursor:not-allowed;'}"
-                                onclick="handleBorrowRequest()">
-                                <span th:if="${book.availableQuantity != null and book.availableQuantity > 0}">📋 Gửi yêu cầu mượn</span>
-                                <span th:unless="${book.availableQuantity != null and book.availableQuantity > 0}">Sách không khả dụng</span>
-                            </button>
+                        <!-- Description -->
+                        <div class="detail-desc-block"
+                            th:if="${book.description != null and !#strings.isEmpty(book.description)}">
+                            <h3>📄 Giới thiệu</h3>
+                            <p class="detail-description" id="bookDescription" th:text="${book.description}">Mô tả sách
+                            </p>
                         </div>
-                    </div>
 
-                    <!-- Description -->
-                    <div class="detail-desc-block" th:if="${book.description != null and !#strings.isEmpty(book.description)}">
-                        <h3>📄 Giới thiệu</h3>
-                        <p class="detail-description" id="bookDescription" th:text="${book.description}">Mô tả sách</p>
-                    </div>
-
-                    <!-- Author bio -->
-                    <div class="detail-author-block" th:if="${book.authorName != null}">
-                        <h3>Về tác giả</h3>
-                        <div class="author-name" th:text="${book.authorName}">Tác giả</div>
-                        <div class="author-bio"
-                             th:if="${book.authorBio != null and !#strings.isEmpty(book.authorBio)}"
-                             th:text="${book.authorBio}">
-                            Tiểu sử tác giả
+                        <!-- Author bio -->
+                        <div class="detail-author-block" th:if="${book.authorName != null}">
+                            <h3>Về tác giả</h3>
+                            <div class="author-name" th:text="${book.authorName}">Tác giả</div>
+                            <div class="author-bio"
+                                th:if="${book.authorBio != null and !#strings.isEmpty(book.authorBio)}"
+                                th:text="${book.authorBio}">
+                                Tiểu sử tác giả
+                            </div>
+                            <div class="author-bio"
+                                th:unless="${book.authorBio != null and !#strings.isEmpty(book.authorBio)}"
+                                style="font-style: italic;">
+                                Chưa có thông tin về tác giả này.
+                            </div>
                         </div>
-                        <div class="author-bio" th:unless="${book.authorBio != null and !#strings.isEmpty(book.authorBio)}"
-                             style="font-style: italic;">
-                            Chưa có thông tin về tác giả này.
+
+                        <!-- Back button -->
+                        <div style="margin-top: 0.5rem;">
+                            <a th:href="@{/books}" class="btn btn-outline" id="backToListBtn">← Quay lại danh sách</a>
                         </div>
-                    </div>
 
-                    <!-- Back & Admin actions -->
-                    <div style="margin-top: 0.5rem; display:flex; gap:0.75rem; flex-wrap:wrap;">
-                        <a th:href="@{/books}" class="btn btn-outline" id="backToListBtn">← Quay lại danh sách</a>
-                        <a th:href="@{/books/{id}/edit(id=${book.id})}" class="btn" id="editBookBtn"
-                           style="background:rgba(99,102,241,0.15);color:#818cf8;border:1px solid rgba(99,102,241,0.3);">
-                            ✏️ Chỉnh sửa
-                        </a>
-                    </div>
+                    </div><!-- end detail-info -->
+                </div><!-- end detail-grid -->
 
-                </div><!-- end detail-info -->
-            </div><!-- end detail-grid -->
+            </div>
+        </section>
+    </main>
 
-        </div>
-    </section>
-</main>
+    <!-- ===== FOOTER ===== -->
+    <footer th:replace="~{fragments/common :: footer}"></footer>
 
-<!-- ===== FOOTER ===== -->
-<footer th:replace="~{fragments/common :: footer}"></footer>
-
-<script>
-    function handleBorrowRequest() {
-        // UC04 placeholder - will be implemented later
-        alert('Tính năng gửi yêu cầu mượn sách sẽ sớm được triển khai!');
-    }
-</script>
+    <!-- No handleBorrowRequest script needed -->
 
 </body>
+
 </html>

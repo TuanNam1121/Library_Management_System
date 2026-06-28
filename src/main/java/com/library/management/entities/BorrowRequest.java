@@ -36,15 +36,9 @@ public class BorrowRequest extends BaseEntity{
     @Enumerated(EnumType.STRING)
     private BorrowStatus status;
 
-
-
     private LocalDateTime requestDate;
 
-
-
     private LocalDateTime approvedAt;
-
-
 
     @OneToMany(
 

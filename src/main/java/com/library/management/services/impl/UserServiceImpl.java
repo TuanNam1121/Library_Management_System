@@ -1,6 +1,7 @@
 package com.library.management.services.impl;
 
 import com.library.management.dto.LoginRequestDTO;
+import com.library.management.dto.LoginedUserDTO;
 import com.library.management.dto.RegisterRequestDTO;
 import com.library.management.entities.Role;
 import com.library.management.entities.User;
@@ -54,5 +55,11 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         return user.getPassword().equals(dto.getPassword());
+    }
+
+    @Override
+    public LoginedUserDTO getLoginUser(LoginRequestDTO loginRequestDTO) {
+        User user = userRepository.findUserByUsernameAndPassword(loginRequestDTO.getUsername(), loginRequestDTO.getPassword());
+        return new LoginedUserDTO(user.getUsername(), user.getRole().getName(), user.getEmail());
     }
 }

@@ -22,13 +22,22 @@
             <a class="brand" th:href="@{/books}">
                 <span class="brand-text">LibraryHub</span>
             </a>
-            <div class="nav-links">
+            <div th:if="${session.loginUser != null && session.loginUser.role == 'READER'}" class="nav-links">
                 <a class="nav-link" th:href="@{/books}">Tìm sách</a>
-                <a class="nav-link" th:href="@{/categories}">Thể loại</a>
-                <a class="nav-link" href="#">Lịch sử mượn</a>
+                <a class="nav-link" th:href="@{/borrows/history}">Lịch sử mượn</a>
             </div>
-            <div class="nav-actions">
-                <a class="btn btn-primary" href="#">Hồ sơ cá nhân</a>
+            <div th:if="${session.loginUser != null && session.loginUser.role == 'ADMIN'}" class="nav-links">
+                <a class="nav-link" th:href="@{/categories}">Book Management</a>
+                <a class="nav-link" th:href="@{/categories}">Categories Management</a>
+                <a class="nav-link" th:href="@{/authors}">Author Management</a>
+                <a class="nav-link" th:href="@{/categories}">Statistics</a>
+            </div>
+            <div th:if="${session.loginUser != null && session.loginUser.role == 'LIBRARIAN'}" class="nav-links">
+                <a class="nav-link" th:href="@{/borrows/requests}">Borrow Request</a>
+                <a class="nav-link" th:href="@{/borrows/management}">Borrow Management</a>
+            </div>
+            <div th:if="${session.loginUser != null}" class="nav-actions">
+                <a th:text="${session.loginUser.getName()}" class="btn btn-primary" href="#"></a>
             </div>
         </div>
     </nav>

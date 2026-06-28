@@ -1,7 +1,9 @@
 package com.library.management.controllers;
 
 import com.library.management.dto.LoginRequestDTO;
+import com.library.management.dto.LoginedUserDTO;
 import com.library.management.dto.RegisterRequestDTO;
+import com.library.management.entities.User;
 import com.library.management.services.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -51,6 +53,7 @@ private final UserService userService;
         model.addAttribute("user",new  LoginRequestDTO());
         return "auths/login";
     }
+
     @PostMapping("/login")
     public String login(@Valid @ModelAttribute("user") LoginRequestDTO loginRequestDTO,
                         BindingResult result,
@@ -68,7 +71,8 @@ private final UserService userService;
             }
 
             // Save user to session
-            session.setAttribute("loggedInUser", loginRequestDTO.getUsername());
+            LoginedUserDTO user = userService.getLoginUser(loginRequestDTO);
+            session.setAttribute("loginUser", user);
 
         } catch (RuntimeException ex) {
             result.reject("loginError", ex.getMessage());
@@ -82,6 +86,6 @@ private final UserService userService;
         session.invalidate();
         return "redirect:/auths/login";
     }
-    }
+}
 
 
