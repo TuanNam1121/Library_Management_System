@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head(title='Hồ sơ cá nhân - LibraryHub', description='Quản lý thông tin tài khoản')}"></head>
+<body>
+
+<nav th:replace="~{fragments/common :: navbar}"></nav>
+
+<main class="section-wrapper">
+    <div class="container" style="max-width: 900px;">
+
+        <!-- Page Header -->
+        <div style="margin-bottom: 2rem;">
+            <h1 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.3rem;">Hồ sơ cá nhân</h1>
+            <p style="color: var(--text-muted); font-size: 0.95rem;">Quản lý thông tin tài khoản và bảo mật</p>
+        </div>
+
+        <!-- Flash Messages -->
+        <div th:if="${successMsg}" class="alert-box alert-success" role="alert">
+             <span th:text="${successMsg}"></span>
+        </div>
+        <div th:if="${errorMsg}" class="alert-box alert-danger" role="alert">
+            <span th:text="${errorMsg}"></span>
+        </div>
+        <div th:if="${passwordSuccess}" class="alert-box alert-success" role="alert">
+            <span th:text="${passwordSuccess}"></span>
+        </div>
+        <div th:if="${passwordError}" class="alert-box alert-danger" role="alert">
+            <span th:text="${passwordError}"></span>
+        </div>
+
+        <div class="profile-grid">
+
+            <!-- ===== LEFT PANEL: Avatar + Summary ===== -->
+            <aside class="profile-aside">
+                <div class="avatar-section">
+                    <div class="avatar-wrapper">
+                        <img th:if="${user.avatar != null and !#strings.isEmpty(user.avatar)}"
+                             th:src="${user.avatar}"
+                             class="avatar-img"
+                             alt="Avatar"/>
+                        <div th:unless="${user.avatar != null and !#strings.isEmpty(user.avatar)}"
+                             class="avatar-placeholder">
+                            <span th:text="${#strings.substring(user.username, 0, 1).toUpperCase()}">U</span>
+                        </div>
+                    </div>
+                    <h3 class="profile-name" th:text="${user.fullName ?: user.username}">Người dùng</h3>
+                    <span class="profile-role-badge"
+                          th:text="${user.role != null ? user.role.name : 'READER'}">READER</span>
+                </div>
+
+                <div class="profile-meta">
+                    <div class="meta-item">
+                        <span class="meta-icon"></span>
+                        <span th:text="${user.email ?: 'Chưa cập nhật'}">email@example.com</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-icon"></span>
+                        <span th:text="${user.phone ?: 'Chưa cập nhật'}">0123456789</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-icon"></span>
+                        <span th:text="${user.address ?: 'Chưa cập nhật'}">Địa chỉ</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-icon"></span>
+                        <span th:text="${user.dob != null ? #temporals.format(user.dob, 'dd/MM/yyyy') : 'Chưa cập nhật'}">01/01/2000</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- ===== RIGHT PANEL: Tabs ===== -->
+            <div class="profile-content">
+
+                <!-- Tabs -->
+                <div class="tab-bar">
+                    <button class="tab-btn active" data-tab="info">Thông tin cá nhân</button>
+                    <button class="tab-btn" data-tab="password">Đổi mật khẩu</button>
+                </div>
+
+                <!-- ===== TAB 1: UPDATE PROFILE ===== -->
+                <div class="tab-panel active" id="tab-info">
+                    <form th:action="@{/profile/update}" method="post" enctype="multipart/form-data"
+                          class="profile-form">
+
+                        <!-- Avatar Upload -->
+                        <div class="form-field">
+                            <label class="form-label">Ảnh đại diện</label>
+                            <div class="avatar-upload-area" id="avatarUploadArea">
+                                <input type="file" id="avatarFileInput" name="avatarFile"
+                                       accept="image/*" style="display:none"/>
+                                <div class="upload-placeholder" id="uploadPlaceholder">
+                                    <div class="upload-icon"></div>
+                                    <p>Nhấp để chọn ảnh hoặc kéo thả vào đây</p>
+                                    <span>PNG, JPG, GIF tối đa 5MB</span>
+                                </div>
+                                <img id="avatarPreview"
+                                     th:if="${user.avatar != null and !#strings.isEmpty(user.avatar)}"
+                                     th:src="${user.avatar}"
+                                     class="avatar-preview-img" alt="Preview"/>
+                            </div>
+                        </div>
+
+                        <div class="form-row-2">
+                            <div class="form-field">
+                                <label class="form-label" for="fullName">Họ và tên</label>
+                                <input class="form-input" type="text" id="fullName" name="fullName"
+                                       th:value="${user.fullName}" placeholder="Nhập họ và tên..."/>
+                            </div>
+                            <div class="form-field">
+                                <label class="form-label" for="email">Email</label>
+                                <input class="form-input" type="email" id="email" name="email"
+                                       th:value="${user.email}" placeholder="Nhập email..."/>
+                            </div>
+                        </div>
+
+                        <div class="form-row-2">
+                            <div class="form-field">
+                                <label class="form-label" for="phone">Số điện thoại</label>
+                                <input class="form-input" type="tel" id="phone" name="phone"
+                                       th:value="${user.phone}" placeholder="Nhập số điện thoại..."/>
+                            </div>
+                            <div class="form-field">
+                                <label class="form-label" for="dob">Ngày sinh</label>
+                                <input class="form-input" type="date" id="dob" name="dob"
+                                       th:value="${user.dob}"/>
+                            </div>
+                        </div>
+
+                        <div class="form-field">
+                            <label class="form-label" for="address">Địa chỉ</label>
+                            <input class="form-input" type="text" id="address" name="address"
+                                   th:value="${user.address}" placeholder="Nhập địa chỉ..."/>
+                        </div>
+
+                        <div style="margin-top: 1.5rem;">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                 Lưu thay đổi
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- ===== TAB 2: CHANGE PASSWORD ===== -->
+                <div class="tab-panel" id="tab-password">
+                    <form th:action="@{/profile/change-password}" method="post" class="profile-form">
+
+                        <div class="form-field">
+                            <label class="form-label" for="currentPassword">Mật khẩu hiện tại</label>
+                            <div class="input-password-wrapper">
+                                <input class="form-input" type="password" id="currentPassword"
+                                       name="currentPassword" placeholder="Nhập mật khẩu hiện tại..."/>
+                                <button type="button" class="toggle-pwd" data-target="currentPassword">👁</button>
+                            </div>
+                        </div>
+
+                        <div class="form-field">
+                            <label class="form-label" for="newPassword">Mật khẩu mới</label>
+                            <div class="input-password-wrapper">
+                                <input class="form-input" type="password" id="newPassword"
+                                       name="newPassword" placeholder="Ít nhất 6 ký tự..."/>
+                                <button type="button" class="toggle-pwd" data-target="newPassword">👁</button>
+                            </div>
+                            <!-- Strength bar -->
+                            <div class="pwd-strength-bar" id="pwdStrengthBar">
+                                <div class="pwd-strength-fill" id="pwdStrengthFill"></div>
+                            </div>
+                            <span class="pwd-strength-label" id="pwdStrengthLabel"></span>
+                        </div>
+
+                        <div class="form-field">
+                            <label class="form-label" for="confirmPassword">Xác nhận mật khẩu mới</label>
+                            <div class="input-password-wrapper">
+                                <input class="form-input" type="password" id="confirmPassword"
+                                       name="confirmPassword" placeholder="Nhập lại mật khẩu mới..."/>
+                                <button type="button" class="toggle-pwd" data-target="confirmPassword">👁</button>
+                            </div>
+                            <span class="pwd-match-msg" id="pwdMatchMsg"></span>
+                        </div>
+
+                        <div style="margin-top: 1.5rem;">
+                            <button type="submit" id="submitPwdBtn" class="btn btn-primary btn-lg">
+                                 Đổi mật khẩu
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <!-- END TABS -->
+
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/common :: footer}"></footer>
+
+<!-- ===== JAVASCRIPT ===== -->
+<script>
+    // --- Tab Switching ---
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+        });
+    });
+
+    // If password error flash, open password tab automatically
+    const hasPwdError = !!document.querySelector('[th\\:if="${passwordError}"]');
+    /*<![CDATA[*/
+    const passwordError = /*[[${passwordError}]]*/ null;
+    const passwordSuccess = /*[[${passwordSuccess}]]*/ null;
+    if (passwordError || passwordSuccess) {
+        document.querySelector('[data-tab="password"]').click();
+    }
+    /*]]>*/
+
+    // --- Avatar Upload Preview ---
+    const uploadArea = document.getElementById('avatarUploadArea');
+    const fileInput = document.getElementById('avatarFileInput');
+    const preview = document.getElementById('avatarPreview');
+    const placeholder = document.getElementById('uploadPlaceholder');
+
+    uploadArea.addEventListener('click', () => fileInput.click());
+    uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('drag-over'); });
+    uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('drag-over'));
+    uploadArea.addEventListener('drop', e => {
+        e.preventDefault();
+        uploadArea.classList.remove('drag-over');
+        const file = e.dataTransfer.files[0];
+        if (file) showPreview(file);
+    });
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files[0]) showPreview(fileInput.files[0]);
+    });
+
+    function showPreview(file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            if (preview) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            } else {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.className = 'avatar-preview-img';
+                img.id = 'avatarPreview';
+                uploadArea.appendChild(img);
+            }
+            if (placeholder) placeholder.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // --- Toggle Password Visibility ---
+    document.querySelectorAll('.toggle-pwd').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const input = document.getElementById(btn.dataset.target);
+            input.type = input.type === 'password' ? 'text' : 'password';
+            btn.textContent = input.type === 'password' ? '👁' : '🙈';
+        });
+    });
+
+    // --- Password Strength ---
+    const newPwd = document.getElementById('newPassword');
+    const fill = document.getElementById('pwdStrengthFill');
+    const label = document.getElementById('pwdStrengthLabel');
+    const confirmPwd = document.getElementById('confirmPassword');
+    const matchMsg = document.getElementById('pwdMatchMsg');
+
+    newPwd.addEventListener('input', () => {
+        const val = newPwd.value;
+        let strength = 0;
+        if (val.length >= 6) strength++;
+        if (/[A-Z]/.test(val)) strength++;
+        if (/[0-9]/.test(val)) strength++;
+        if (/[^A-Za-z0-9]/.test(val)) strength++;
+
+        const pct = (strength / 4) * 100;
+        fill.style.width = pct + '%';
+        const colors = ['#ef4444', '#f59e0b', '#10b981', '#6366f1'];
+        const labels = ['Yếu', 'Trung bình', 'Khá', 'Mạnh'];
+        fill.style.background = colors[strength - 1] || '#ef4444';
+        label.textContent = val.length === 0 ? '' : labels[strength - 1] || 'Yếu';
+        label.style.color = colors[strength - 1] || '#ef4444';
+        checkMatch();
+    });
+
+    confirmPwd.addEventListener('input', checkMatch);
+
+    function checkMatch() {
+        if (!confirmPwd.value) { matchMsg.textContent = ''; return; }
+        if (newPwd.value === confirmPwd.value) {
+            matchMsg.textContent = ' Mật khẩu khớp';
+            matchMsg.style.color = 'var(--accent-success)';
+        } else {
+            matchMsg.textContent = 'Mật khẩu không khớp';
+            matchMsg.style.color = 'var(--accent-danger)';
+        }
+    }
+</script>
+
+</body>
+</html>

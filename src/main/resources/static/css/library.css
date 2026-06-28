@@ -761,3 +761,277 @@ body {
 .books-grid .book-card:nth-child(7) { animation-delay: 0.14s; }
 .books-grid .book-card:nth-child(8) { animation-delay: 0.16s; }
 .books-grid .book-card:nth-child(9) { animation-delay: 0.18s; }
+
+/* ============================================================
+   PROFILE PAGE STYLES
+   ============================================================ */
+
+/* Alert boxes */
+.alert-box {
+    padding: 0.9rem 1.25rem;
+    border-radius: var(--radius-md);
+    margin-bottom: 1.25rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+    animation: fadeInUp 0.3s ease;
+}
+.alert-success {
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    color: var(--accent-success);
+}
+.alert-danger {
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    color: var(--accent-danger);
+}
+
+/* Profile grid layout */
+.profile-grid {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 2rem;
+    align-items: start;
+}
+@media (max-width: 768px) {
+    .profile-grid { grid-template-columns: 1fr; }
+}
+
+/* Left aside */
+.profile-aside {
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: 2rem 1.5rem;
+    text-align: center;
+    position: sticky;
+    top: 5rem;
+}
+
+.avatar-section { margin-bottom: 1.5rem; }
+
+.avatar-wrapper {
+    width: 110px;
+    height: 110px;
+    margin: 0 auto 1rem;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid var(--accent-primary);
+    box-shadow: 0 0 0 6px rgba(99,102,241,0.15);
+}
+
+.avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    background: var(--gradient-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: white;
+}
+
+.profile-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+}
+
+.profile-role-badge {
+    display: inline-block;
+    padding: 0.25rem 0.8rem;
+    background: rgba(99,102,241,0.15);
+    border: 1px solid rgba(99,102,241,0.3);
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--accent-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.profile-meta {
+    text-align: left;
+    border-top: 1px solid var(--glass-border);
+    padding-top: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.meta-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    word-break: break-all;
+}
+
+.meta-icon { flex-shrink: 0; }
+
+/* Right panel / tabs */
+.profile-content {
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.tab-bar {
+    display: flex;
+    border-bottom: 1px solid var(--glass-border);
+    background: rgba(0,0,0,0.1);
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 1rem 1.5rem;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: var(--font-family);
+    border-bottom: 3px solid transparent;
+}
+
+.tab-btn:hover { color: var(--text-primary); }
+
+.tab-btn.active {
+    color: var(--accent-primary);
+    border-bottom-color: var(--accent-primary);
+    background: rgba(99,102,241,0.05);
+}
+
+.tab-panel { display: none; padding: 2rem; }
+.tab-panel.active { display: block; }
+
+/* Profile form */
+.profile-form { display: flex; flex-direction: column; gap: 1.25rem; }
+
+.form-field { display: flex; flex-direction: column; gap: 0.4rem; }
+
+.form-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.form-input {
+    padding: 0.75rem 1rem;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-family: var(--font-family);
+    font-size: 0.95rem;
+    outline: none;
+    transition: var(--transition);
+}
+
+.form-input:focus {
+    border-color: var(--accent-primary);
+    background: rgba(255,255,255,0.08);
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+}
+
+.form-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+}
+@media (max-width: 600px) {
+    .form-row-2 { grid-template-columns: 1fr; }
+}
+
+/* Avatar upload area */
+.avatar-upload-area {
+    border: 2px dashed var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    min-height: 130px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatar-upload-area:hover, .avatar-upload-area.drag-over {
+    border-color: var(--accent-primary);
+    background: rgba(99,102,241,0.05);
+}
+
+.upload-placeholder { pointer-events: none; }
+.upload-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+.upload-placeholder p { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.25rem; }
+.upload-placeholder span { font-size: 0.78rem; color: var(--text-muted); }
+
+.avatar-preview-img {
+    max-width: 200px;
+    max-height: 150px;
+    border-radius: var(--radius-md);
+    object-fit: cover;
+    border: 2px solid var(--accent-primary);
+}
+
+/* Password input */
+.input-password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-password-wrapper .form-input {
+    flex: 1;
+    padding-right: 3rem;
+}
+
+.toggle-pwd {
+    position: absolute;
+    right: 0.75rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    color: var(--text-muted);
+    padding: 0;
+    line-height: 1;
+}
+
+/* Strength bar */
+.pwd-strength-bar {
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    margin-top: 0.4rem;
+    overflow: hidden;
+}
+
+.pwd-strength-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 2px;
+    transition: width 0.4s ease, background 0.4s ease;
+}
+
+.pwd-strength-label, .pwd-match-msg {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-top: 0.25rem;
+    display: block;
+}

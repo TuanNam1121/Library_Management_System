@@ -5,22 +5,20 @@ import com.library.management.dto.LoginedUserDTO;
 import com.library.management.dto.RegisterRequestDTO;
 import com.library.management.entities.User;
 import com.library.management.services.UserService;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/auths")
 @RequiredArgsConstructor
-
 public class AuthController {
-private final UserService userService;
+
+    private final UserService userService;
 
     @GetMapping("/register")
     public String registerProcess(Model model) {
@@ -36,56 +34,59 @@ private final UserService userService;
         if (result.hasErrors()) {
             return "auths/register";
         }
-
         try {
             userService.register(dto);
         } catch (RuntimeException ex) {
             result.reject("registerError", ex.getMessage());
             return "auths/register";
         }
-
         return "redirect:/auths/login";
     }
 
-
     @GetMapping("/login")
-    public String loginProcess(Model model){
-        model.addAttribute("user",new  LoginRequestDTO());
+    public String loginProcess(Model model) {
+        model.addAttribute("user", new LoginRequestDTO());
         return "auths/login";
     }
 
     @PostMapping("/login")
-    public String login(@Valid @ModelAttribute("user") LoginRequestDTO loginRequestDTO,
+    public String login(@Valid @ModelAttribute("user") LoginRequestDTO dto,
                         BindingResult result,
-                        Model model,
-                        jakarta.servlet.http.HttpSession session){
-        if(result.hasErrors()){
+                        HttpSession session) {
+        if (result.hasErrors()) {
             return "auths/login";
         }
         try {
-            boolean success = userService.login(loginRequestDTO);
+            User user = userService.login(dto);
 
-            if (!success) {
+
+            if (!dto.getUsername().equals(user.getUsername()) || !dto.getPassword().equals(user.getPassword())) {
                 result.reject("loginError", "Invalid username or password");
                 return "auths/login";
             }
 
-            // Save user to session
-            LoginedUserDTO user = userService.getLoginUser(loginRequestDTO);
-            session.setAttribute("loginUser", user);
+
+            // Lưu thông tin vào session
+            session.setAttribute("loggedInUser", user.getUsername());
+            session.setAttribute("userRole", user.getRole() != null ? user.getRole().getName() : "READER");
+
 
         } catch (RuntimeException ex) {
             result.reject("loginError", ex.getMessage());
             return "auths/login";
         }
+
+        // Redirect theo role
+        String role = (String) session.getAttribute("userRole");
+        if (role != null && (role.equalsIgnoreCase("ADMIN") || role.equalsIgnoreCase("LIBRARIAN"))) {
+            return "redirect:/admin/dashboard";
+        }
         return "redirect:/books";
     }
 
     @GetMapping("/logout")
-    public String logout(jakarta.servlet.http.HttpSession session) {
+    public String logout(HttpSession session) {
         session.invalidate();
         return "redirect:/auths/login";
     }
 }
-
-

@@ -22,22 +22,45 @@
             <a class="brand" th:href="@{/books}">
                 <span class="brand-text">LibraryHub</span>
             </a>
-            <div th:if="${session.loginUser != null && session.loginUser.role == 'READER'}" class="nav-links">
+
+            <!-- Nav links: READER -->
+            <div th:if="${session.loggedInUser != null and session.userRole == 'READER'}" class="nav-links">
                 <a class="nav-link" th:href="@{/books}">Tìm sách</a>
-                <a class="nav-link" th:href="@{/borrows/history}">Lịch sử mượn</a>
+                <a class="nav-link" href="#">Lịch sử mượn</a>
             </div>
-            <div th:if="${session.loginUser != null && session.loginUser.role == 'ADMIN'}" class="nav-links">
-                <a class="nav-link" th:href="@{/categories}">Book Management</a>
-                <a class="nav-link" th:href="@{/categories}">Categories Management</a>
-                <a class="nav-link" th:href="@{/authors}">Author Management</a>
-                <a class="nav-link" th:href="@{/categories}">Statistics</a>
+
+            <!-- Nav links: ADMIN -->
+            <div th:if="${session.loggedInUser != null and session.userRole == 'ADMIN'}" class="nav-links">
+                <a class="nav-link" th:href="@{/admin/dashboard}">Dashboard</a>
+                <a class="nav-link" th:href="@{/books}">Quản lý Sách</a>
             </div>
-            <div th:if="${session.loginUser != null && session.loginUser.role == 'LIBRARIAN'}" class="nav-links">
-                <a class="nav-link" th:href="@{/borrows/requests}">Borrow Request</a>
-                <a class="nav-link" th:href="@{/borrows/management}">Borrow Management</a>
+
+            <!-- Nav links: LIBRARIAN -->
+            <div th:if="${session.loggedInUser != null and session.userRole == 'LIBRARIAN'}" class="nav-links">
+                <a class="nav-link" th:href="@{/admin/dashboard}">Dashboard</a>
+                <a class="nav-link" href="#">Quản lý Mượn/Trả</a>
             </div>
-            <div th:if="${session.loginUser != null}" class="nav-actions">
-                <a th:text="${session.loginUser.getName()}" class="btn btn-primary" href="#"></a>
+
+            <!-- Nav links: Guest (chưa đăng nhập) -->
+            <div th:if="${session.loggedInUser == null}" class="nav-links">
+                <a class="nav-link" th:href="@{/books}">Tìm sách</a>
+            </div>
+
+            <!-- Nav actions -->
+            <div class="nav-actions">
+                <!-- Chưa đăng nhập -->
+                <th:block th:if="${session.loggedInUser == null}">
+                    <a class="btn btn-outline" th:href="@{/auths/login}">Đăng nhập</a>
+                    <a class="btn btn-primary" th:href="@{/auths/register}">Đăng ký</a>
+                </th:block>
+
+                <!-- Đã đăng nhập -->
+                <th:block th:if="${session.loggedInUser != null}">
+                    <a th:href="@{/profile}" class="nav-link" style="display:flex;align-items:center;gap:0.5rem;">
+                        👤 <span th:text="${session.loggedInUser}">User</span>
+                    </a>
+                    <a class="btn btn-outline" th:href="@{/auths/logout}">Đăng xuất</a>
+                </th:block>
             </div>
         </div>
     </nav>
