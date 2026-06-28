@@ -1,5 +1,6 @@
 package com.library.management.services;
 
+import com.library.management.dto.BookFormDTO;
 import com.library.management.dto.BookReturnDTO;
 import com.library.management.dto.BookSearchDTO;
 import org.springframework.data.domain.Page;
@@ -12,4 +13,12 @@ public interface BookService {
     Page<BookReturnDTO> searchBooks(BookSearchDTO searchDTO);
 
     BookReturnDTO getBookById(Long id);
+
+    BookReturnDTO getBookByIdForAdmin(Long id);
+
+    BookReturnDTO createBook(BookFormDTO formDTO);
+
+    BookReturnDTO updateBook(Long id, BookFormDTO formDTO);
+
+    void deleteBook(Long id);
 }

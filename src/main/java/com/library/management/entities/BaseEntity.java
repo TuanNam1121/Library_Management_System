@@ -24,7 +24,7 @@ public abstract class BaseEntity {
     private LocalDateTime deletedAt;
 
     @Column(name = "is_deleted")
-    private Boolean isDeleted;
+    private Boolean isDeleted = false;
 
     @Column(name = "created_by")
     private String createdBy;
