@@ -54,9 +54,10 @@ private final UserService userService;
     @PostMapping("/login")
     public String login(@Valid @ModelAttribute("user") LoginRequestDTO loginRequestDTO,
                         BindingResult result,
-                        Model model){
+                        Model model,
+                        jakarta.servlet.http.HttpSession session){
         if(result.hasErrors()){
-            return "auth/login";
+            return "auths/login";
         }
         try {
             boolean success = userService.login(loginRequestDTO);
@@ -66,11 +67,20 @@ private final UserService userService;
                 return "auths/login";
             }
 
+            // Save user to session
+            session.setAttribute("loggedInUser", loginRequestDTO.getUsername());
+
         } catch (RuntimeException ex) {
             result.reject("loginError", ex.getMessage());
             return "auths/login";
         }
         return "redirect:/books";
+    }
+
+    @GetMapping("/logout")
+    public String logout(jakarta.servlet.http.HttpSession session) {
+        session.invalidate();
+        return "redirect:/auths/login";
     }
     }
 
