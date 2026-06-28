@@ -17,23 +17,17 @@
 
     <!-- ===== NAVBAR FRAGMENT ===== -->
     <nav class="navbar" th:fragment="navbar">
-        <div class="container navbar-inner" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0;">
-            <a class="brand text-decoration-none" th:href="@{/books}" style="font-size: 1.5rem; font-weight: bold;">
+        <div class="container navbar-inner">
+            <a class="brand" th:href="@{/books}">
                 <span class="brand-text">LibraryHub</span>
             </a>
             <div class="nav-links">
-                <a class="nav-link me-3 text-decoration-none" th:href="@{/books}">Tìm sách</a>
-                <a class="nav-link me-3 text-decoration-none" href="#" th:if="${session.loggedInUser != null}">Lịch sử mượn</a>
+                <a class="nav-link" th:href="@{/books}">Tìm sách</a>
+                <a class="nav-link" th:href="@{/categories}">Thể loại</a>
+                <a class="nav-link" href="#">Lịch sử mượn</a>
             </div>
             <div class="nav-actions">
-                <th:block th:if="${session.loggedInUser == null}">
-                    <a class="btn btn-outline-primary me-2" th:href="@{/auths/login}">Đăng nhập</a>
-                    <a class="btn btn-primary" th:href="@{/auths/register}">Đăng ký</a>
-                </th:block>
-                <th:block th:if="${session.loggedInUser != null}">
-                    <span class="me-3 fw-bold" th:text="'Xin chào, ' + ${session.loggedInUser}"></span>
-                    <a class="btn btn-outline-danger" th:href="@{/auths/logout}">Đăng xuất</a>
-                </th:block>
+                <a class="btn btn-primary" href="#">Hồ sơ cá nhân</a>
             </div>
         </div>
     </nav>
