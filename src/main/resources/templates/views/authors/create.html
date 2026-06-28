@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/common :: head(title='Update Author')}"></head>
+
+<body>
+
+<nav th:replace="~{fragments/common :: navbar}"></nav>
+
+<section class="section-wrapper">
+
+    <div class="container">
+
+        <div class="row justify-content-center">
+
+            <div class="col-lg-8">
+
+                <div class="card shadow-lg border-0 rounded-4">
+
+                    <div class="card-body p-5">
+
+                        <h2 class="fw-bold mb-2">
+                            Author Detail
+                        </h2>
+
+                        <p class="text-muted mb-4">
+                            update author information.
+                        </p>
+
+                        <form th:action="@{/authors/save}"
+                              th:object="${author}"
+                              method="post">
+
+                            <input type="hidden" th:field="*{id}">
+
+                            <!-- Name -->
+                            <div class="mb-4">
+
+                                <label class="form-label fw-semibold">
+                                    Author Name
+                                </label>
+
+                                <input
+                                        type="text"
+                                        class="form-control form-control-lg"
+                                        th:field="*{name}"
+                                        placeholder="Enter Author's name"
+                                        required>
+
+                            </div>
+
+                            <!-- Biography -->
+                            <div class="mb-4">
+
+                                <label class="form-label fw-semibold">
+                                    Biography
+                                </label>
+
+                                <textarea
+                                        class="form-control"
+                                        rows="7"
+                                        th:field="*{bio}"
+                                        placeholder="Write a short biography...">
+                                </textarea>
+
+                            </div>
+
+                            <hr class="my-4">
+
+                            <div class="d-flex justify-content-end gap-3">
+
+                                <a th:href="@{/authors/list}"
+                                   class="btn btn-outline-secondary px-4">
+                                    Cancel
+                                </a>
+
+                                <button
+                                        type="submit"
+                                        class="btn btn-success px-5">
+
+                                    Save
+
+                                </button>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+</body>
+</html>
