@@ -1,111 +1,90 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <th:block th:replace="~{fragments/common :: head(title='Categories List - LibraryHub', description='Manage book categories')}"></th:block>
+    <th:block th:replace="~{fragments/common :: head(title='Danh sách Thể loại - LibraryHub', description='Quản lý danh sách thể loại sách')}"></th:block>
     <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Inter', sans-serif;
-        }
-        .main-container {
-            margin-top: 3rem;
-            margin-bottom: 5rem;
-            min-height: 60vh;
-        }
-        .custom-card {
-            border: none;
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
-            border-radius: 1rem;
-            overflow: hidden;
-        }
-        .custom-card-header {
-            background-color: #ffffff;
-            border-bottom: 1px solid #edf2f7;
-            padding: 1.5rem;
-        }
-        .btn-custom-add {
-            background-color: #10b981;
-            color: white;
-            font-weight: 500;
-            padding: 0.5rem 1.25rem;
-            border-radius: 0.5rem;
-            border: none;
-            transition: all 0.2s;
-        }
-        .btn-custom-add:hover {
-            background-color: #059669;
-            color: white;
-            transform: translateY(-1px);
-        }
-        .table > :not(caption) > * > * {
-            padding: 1rem 1.5rem;
-            vertical-align: middle;
-        }
-        .table th {
-            font-weight: 600;
-            color: #4b5563;
-            background-color: #f9fafb;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 0.05em;
-        }
-    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <!-- Ensure library.css overrides Bootstrap defaults for dark theme consistency -->
+    <link href="/css/library.css" rel="stylesheet">
 </head>
 <body>
 
 <!-- ===== NAVBAR ===== -->
 <nav th:replace="~{fragments/common :: navbar}"></nav>
 
-<!-- ===== MAIN CONTENT ===== -->
-<main class="container main-container">
-    <!-- Success Alert -->
-    <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-        <strong>🎉 Success!</strong> A new category has been added to the list.
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+<!-- ===== HERO BANNER ===== -->
+<section class="hero-section">
+    <div class="container" style="position: relative; z-index: 1;">
+        <h1 class="hero-title">Quản lý <span>Thể loại Sách</span></h1>
+        <p class="hero-subtitle">Quản lý và theo dõi các thể loại sách hiện có trong hệ thống</p>
+        <div style="margin-top: 1.5rem;">
+            <a th:href="@{/categories/create}" class="btn btn-primary">➕ Thêm Thể loại mới</a>
+        </div>
     </div>
+</section>
 
-    <div class="card custom-card">
-        <div class="custom-card-header d-flex justify-content-between align-items-center flex-wrap">
-            <div>
-                <h2 class="h4 mb-1 fw-bold text-dark">Book Categories</h2>
-                <p class="text-muted mb-0 small">Manage and track existing book categories in the system</p>
-            </div>
-            <!-- Add Category Button -->
-            <a th:href="@{/categories/create}" class="btn btn-custom-add mt-2 mt-md-0">
-                ➕ Add New Category
-            </a>
+<!-- ===== MAIN CONTENT ===== -->
+<main class="section-wrapper">
+    <div class="container">
+        <!-- Success Alerts -->
+        <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show mb-4 shadow-lg" role="alert" 
+             style="max-width: 1100px; margin: 0 auto; background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: var(--accent-success);">
+            <strong>Thành công!</strong> Đã thêm thể loại mới vào danh sách.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${param.updated}" class="alert alert-success alert-dismissible fade show mb-4 shadow-lg" role="alert" 
+             style="max-width: 1100px; margin: 0 auto; background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: var(--accent-success);">
+            <strong>Thành công!</strong> Đã cập nhật thông tin thể loại.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${param.deleted}" class="alert alert-success alert-dismissible fade show mb-4 shadow-lg" role="alert" 
+             style="max-width: 1100px; margin: 0 auto; background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: var(--accent-success);">
+            <strong>Thành công!</strong> Đã xóa thể loại khỏi hệ thống.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
 
-        <div class="card-body p-0">
+        <!-- Categories Table Container -->
+        <div class="search-form-wrapper" style="max-width: 1100px; margin: 0 auto; padding: 2rem;">
             <div class="table-responsive">
-                <table class="table table-hover mb-0">
+                <table class="table mb-0" style="color: var(--text-primary);">
                     <thead>
-                        <tr>
-                            <th style="width: 10%;">ID</th>
-                            <th style="width: 35%;">Category Name</th>
-                            <th style="width: 40%;">Description</th>
-                            <th style="width: 15%;" class="text-center">Actions</th>
+                        <tr style="border-bottom: 1px solid var(--glass-border);">
+                            <th style="width: 8%; color: var(--text-secondary); border: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">ID</th>
+                            <th style="width: 27%; color: var(--text-secondary); border: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Tên Thể Loại</th>
+                            <th style="width: 35%; color: var(--text-secondary); border: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Mô Tả</th>
+                            <th style="width: 30%; color: var(--text-secondary); border: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;" class="text-center">Thao Tác</th>
                         </tr>
                     </thead>
                     <tbody>
                         <!-- Categories List -->
-                        <tr th:each="cat : ${categories}">
-                            <td class="fw-semibold text-secondary" th:text="${cat.id}">1</td>
-                            <td class="fw-bold text-dark" th:text="${cat.name}">Category Name</td>
-                            <td class="text-muted" th:text="${cat.description ?: 'No description available'}">Description details</td>
-                            <td class="text-center">
-                                <a th:href="@{/books(categoryId=${cat.id})}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
-                                    📚 View Books
-                                </a>
+                        <tr th:each="cat : ${categories}" style="border-bottom: 1px solid var(--glass-border);">
+                            <td style="color: var(--text-secondary); border: none; vertical-align: middle;" th:text="${cat.id}">1</td>
+                            <td style="font-weight: 700; color: var(--text-primary); border: none; vertical-align: middle;" th:text="${cat.name}">Tên thể loại</td>
+                            <td style="color: var(--text-secondary); border: none; vertical-align: middle; font-size: 0.95rem;" th:text="${cat.description ?: 'Không có mô tả'}">Mô tả chi tiết</td>
+                            <td class="text-center" style="border: none; vertical-align: middle;">
+                                <div class="d-flex justify-content-center gap-2">
+                                    <a th:href="@{/books(categoryId=${cat.id})}" class="btn btn-outline btn-sm">
+                                        📚 Xem sách
+                                    </a>
+                                    <a th:href="@{/categories/edit/{id}(id=${cat.id})}" class="btn btn-outline btn-sm" style="color: var(--accent-warning); border-color: var(--accent-warning);">
+                                        ✏️ Sửa
+                                    </a>
+                                    <a th:href="@{/categories/delete/{id}(id=${cat.id})}" class="btn btn-outline btn-sm" style="color: var(--accent-danger); border-color: var(--accent-danger);" onclick="return confirm('Bạn có chắc chắn muốn xóa thể loại này không?');">
+                                        🗑️ Xóa
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                         <!-- Empty State -->
                         <tr th:if="${#lists.isEmpty(categories)}">
-                            <td colspan="4" class="text-center py-5">
-                                <div class="text-muted mb-2">📂 No book categories found in the system</div>
-                                <a th:href="@{/categories/create}" class="btn btn-sm btn-primary mt-2">Create first category</a>
+                            <td colspan="4" class="text-center py-5" style="border: none;">
+                                <div class="empty-state" style="padding: 2rem 1rem;">
+                                    <div class="empty-state-icon">📂</div>
+                                    <h3>Chưa có thể loại sách nào</h3>
+                                    <p>Hãy bắt đầu bằng cách tạo thể loại sách đầu tiên trong hệ thống.</p>
+                                    <a th:href="@{/categories/create}" class="btn btn-primary" style="margin-top: 1.5rem;">Tạo thể loại đầu tiên</a>
+                                </div>
                             </td>
                         </tr>
                     </tbody>
@@ -119,6 +98,8 @@
 <footer th:replace="~{fragments/common :: footer}"></footer>
 
 <!-- Bootstrap 5 JS Bundle -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
 </body>
 </html>
