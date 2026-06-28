@@ -14,7 +14,7 @@ public class AuthorController {
 
     private final AuthorService authorService;
 
-    @GetMapping("/list")
+    @GetMapping
     public String list(Model model){
 
         model.addAttribute("authors", authorService.findAll());
@@ -35,7 +35,7 @@ public class AuthorController {
 
         authorService.save(author);
 
-        return "redirect:/authors/list";
+        return "redirect:/authors";
     }
 
     @GetMapping("/edit/{id}")
@@ -55,7 +55,7 @@ public class AuthorController {
 
         authorService.delete(id);
 
-        return "redirect:/authors/list";
+        return "redirect:/authors";
     }
 
 
