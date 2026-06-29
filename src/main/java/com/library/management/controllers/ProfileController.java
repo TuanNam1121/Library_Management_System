@@ -61,7 +61,11 @@ public class ProfileController {
             redirectAttributes.addFlashAttribute("passwordError", result.getAllErrors().get(0).getDefaultMessage());
             return "redirect:/profile";
         }
-
+        if(dto.getNewPassword().equals(userService.getByUsername(username).getPassword())) {
+            redirectAttributes.addFlashAttribute("passwordError",
+                    "Mật khẩu mới phải khác mật khẩu cũ!");
+            return "redirect:/profile";
+        }
         try {
             userService.changePassword(username, dto);
             redirectAttributes.addFlashAttribute("passwordSuccess", "Đổi mật khẩu thành công!");
