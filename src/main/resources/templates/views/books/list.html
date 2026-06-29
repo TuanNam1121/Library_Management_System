@@ -100,7 +100,7 @@
                 <div style="font-size:0.8rem; color:var(--text-muted);" th:if="${totalPages > 1}">
                     Trang <strong th:text="${currentPage + 1}">1</strong> / <strong th:text="${totalPages}">1</strong>
                 </div>
-                <a th:href="@{/books/new}" class="btn btn-primary" id="addBookBtn" style="font-size:0.85rem;padding:0.45rem 1rem;">+ Thêm sách</a>
+                <a th:if="${session.userRole == 'ADMIN'}" th:href="@{/books/new}" class="btn btn-primary" id="addBookBtn" style="font-size:0.85rem;padding:0.45rem 1rem;">+ Thêm sách</a>
             </div>
         </div>
 
