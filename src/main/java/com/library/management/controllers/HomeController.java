@@ -14,7 +14,7 @@ public class HomeController {
 
     @GetMapping
     public String homepage(Model model, HttpSession session){
-        if(session.getAttribute("user") == null) return "redirect:auths/login";
+        if(session.getAttribute("loggedInUser") == null) return "redirect:auths/login";
         return "redirect:books/";
     }
 

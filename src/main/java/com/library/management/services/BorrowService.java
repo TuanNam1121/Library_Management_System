@@ -12,6 +12,6 @@ public interface BorrowService {
     BorrowRequest getRequestById(Long id);
     void approveRequest(Long requestId, String librarianUsername);
     void rejectRequest(Long requestId, String librarianUsername);
-    void recordReturn(Long requestId);
+    boolean recordReturn(Long requestId);
     void payFine(Long requestId);
 }

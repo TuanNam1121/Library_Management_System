@@ -23,22 +23,23 @@
                 <span class="brand-text">LibraryHub</span>
             </a>
 
-            <!-- Nav links: READER -->
+            <!-- Nav links: READER (UC02, UC05) -->
             <div th:if="${session.loggedInUser != null and session.userRole == 'READER'}" class="nav-links">
                 <a class="nav-link" th:href="@{/books}">Tìm sách</a>
-                <a class="nav-link" href="#">Lịch sử mượn</a>
+                <a class="nav-link" th:href="@{/borrows/history}">Lịch sử mượn</a>
             </div>
 
-            <!-- Nav links: ADMIN -->
+            <!-- Nav links: ADMIN (UC08, UC09) -->
             <div th:if="${session.loggedInUser != null and session.userRole == 'ADMIN'}" class="nav-links">
-                <a class="nav-link" th:href="@{/admin/dashboard}">Dashboard</a>
                 <a class="nav-link" th:href="@{/books}">Quản lý Sách</a>
+                <a class="nav-link" th:href="@{/categories}">Quản lý Thể loại</a>
+                <a class="nav-link" th:href="@{/authors}">Quản lý Tác giả</a>
             </div>
 
-            <!-- Nav links: LIBRARIAN -->
+            <!-- Nav links: LIBRARIAN (UC06, UC07) -->
             <div th:if="${session.loggedInUser != null and session.userRole == 'LIBRARIAN'}" class="nav-links">
-                <a class="nav-link" th:href="@{/admin/dashboard}">Dashboard</a>
-                <a class="nav-link" href="#">Quản lý Mượn/Trả</a>
+                <a class="nav-link" th:href="@{/borrows/requests}">Duyệt yêu cầu mượn</a>
+                <a class="nav-link" th:href="@{/borrows/management}">Quản lý Mượn/Trả</a>
             </div>
 
             <!-- Nav links: Guest (chưa đăng nhập) -->

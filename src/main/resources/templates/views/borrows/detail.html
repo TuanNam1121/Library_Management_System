@@ -57,15 +57,23 @@
     <div class="container py-4" style="max-width: 1100px;">
         
         <!-- Alerts -->
-        <div th:if="${param.success}" class="alert alert-success" style="background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: var(--accent-success); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem;">
+        <div th:if="${param.success != null and param.success[0] != 'returnedWithFine'}" class="alert alert-success" style="background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: var(--accent-success); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem;">
             <strong th:if="${param.success[0] == 'approved'}">Yêu cầu mượn sách đã được phê duyệt.</strong>
             <strong th:if="${param.success[0] == 'rejected'}">Yêu cầu mượn sách đã bị từ chối.</strong>
-            <strong th:if="${param.success[0] == 'returned'}">Đã ghi nhận trả sách thành công.</strong>
-            <strong th:if="${param.success[0] == 'paid'}">Đã hoàn tất thanh toán tiền phạt quá hạn và nhận lại sách.</strong>
+            <strong th:if="${param.success[0] == 'returned'}">✅ Đã ghi nhận trả sách thành công (không có phí phạt).</strong>
+            <strong th:if="${param.success[0] == 'paid'}">✅ Đã hoàn tất thanh toán tiền phạt quá hạn và nhận lại sách.</strong>
+        </div>
+        <!-- Alert riêng khi trả sách nhưng có phí phạt cần nộp -->
+        <div th:if="${param.success != null and param.success[0] == 'returnedWithFine'}"
+             class="alert"
+             style="background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.4); color: var(--accent-warning); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem;">
+            <strong>⚠️ Đã ghi nhận trả sách — Còn phí phạt quá hạn cần thanh toán!</strong>
+            <p style="margin: 0.4rem 0 0; font-size: 0.9rem; opacity: 0.9;">Vui lòng xem thông tin phí phạt bên dưới và xác nhận thanh toán để hoàn tất việc trả sách.</p>
         </div>
         <div th:if="${param.error}" class="alert alert-danger" style="background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: var(--accent-danger); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem;">
             <strong>Lỗi!</strong> <span th:text="${param.error}">Có lỗi xảy ra.</span>
         </div>
+
 
         <div class="row">
             <!-- LEFT COLUMN: READER & APPROVAL INFO -->
@@ -214,12 +222,12 @@
         <div class="d-flex justify-content-between align-items-center mt-3 pt-3" style="border-top: 1px solid var(--glass-border);">
             <!-- Back button depending on role -->
             <div>
-                <a th:if="${session.loginUser.role == 'LIBRARIAN'}" th:href="@{/borrows/requests}" class="btn btn-outline">← Quay lại danh sách chờ</a>
-                <a th:if="${session.loginUser.role == 'READER'}" th:href="@{/borrows/history}" class="btn btn-outline">← Quay lại lịch sử mượn</a>
+                <a th:if="${session.userRole == 'LIBRARIAN'}" th:href="@{/borrows/requests}" class="btn btn-outline">← Quay lại danh sách chờ</a>
+                <a th:if="${session.userRole == 'READER'}" th:href="@{/borrows/history}" class="btn btn-outline">← Quay lại lịch sử mượn</a>
             </div>
 
             <!-- Approval Controls (Only for LIBRARIAN and PENDING requests) -->
-            <div th:if="${session.loginUser.role == 'LIBRARIAN' && request.status == T(com.library.management.enums.BorrowStatus).PENDING}" class="d-flex gap-2">
+            <div th:if="${session.userRole == 'LIBRARIAN' && request.status == T(com.library.management.enums.BorrowStatus).PENDING}" class="d-flex gap-2">
                 <form th:action="@{/borrows/{id}/approve(id=${request.id})}" method="POST" style="display: inline;">
                     <button type="submit" class="btn btn-success">
                         ✔️ Duyệt yêu cầu mượn
@@ -233,22 +241,61 @@
             </div>
 
             <!-- Return & Fine Payment Controls (Only for LIBRARIAN and APPROVED requests) -->
-            <div th:if="${session.loginUser.role == 'LIBRARIAN' && request.status == T(com.library.management.enums.BorrowStatus).APPROVED}" class="d-flex gap-2">
-                <!-- If there is a fine and it is unpaid, show Confirm Payment button -->
-                <div th:with="hasUnpaidFine=${request.details != null && !request.details.isEmpty() && request.details[0].fine != null && !request.details[0].fine.paid}">
-                    <form th:if="${hasUnpaidFine}" th:action="@{/borrows/{id}/pay-fine(id=${request.id})}" method="POST" style="display: inline;">
-                        <button type="submit" class="btn btn-success">
-                            💰 Xác nhận đã thanh toán
-                        </button>
-                    </form>
-                    
-                    <!-- If no fine has been recorded yet (or returnDate is null), show Record Return button -->
-                    <form th:unless="${hasUnpaidFine}" th:action="@{/borrows/{id}/return(id=${request.id})}" method="POST" style="display: inline;">
-                        <button type="submit" class="btn btn-primary">
+            <div th:if="${session.userRole == 'LIBRARIAN' and request.status == T(com.library.management.enums.BorrowStatus).APPROVED}"
+                 th:with="detail0=${request.details != null and !request.details.isEmpty() ? request.details[0] : null}">
+
+                <!--
+                    3 trạng thái con khi APPROVED:
+                    A) returnDate == null          → chưa bấm "Đã trả"            → show nút "Đã trả"
+                    B) returnDate != null + fine chưa TT → đã trả, có phí quá hạn → show card phí + nút TT
+                    C) returnDate != null + không fine/đã TT → không phí / đã TT   → (sẽ tự RETURNED, không cần nút)
+                -->
+
+                <!-- === CASE A: Chưa trả === -->
+                <div th:if="${detail0 != null and detail0.returnDate == null}">
+                    <form th:action="@{/borrows/{id}/return(id=${request.id})}" method="POST" style="display:inline;">
+                        <button type="submit" class="btn btn-primary"
+                                onclick="return confirm('Xác nhận độc giả đã trả sách?')">
                             ↩️ Đã trả
                         </button>
                     </form>
                 </div>
+
+                <!-- === CASE B: Đã trả — có phí quá hạn, chưa thanh toán === -->
+                <div th:if="${detail0 != null and detail0.returnDate != null and detail0.fine != null and !detail0.fine.paid}"
+                     class="d-flex flex-column gap-2 align-items-end">
+                    <!-- Card hiển thị thông tin phí -->
+                    <div style="background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.4);
+                                border-radius: 8px; padding: 0.75rem 1rem; min-width: 260px;">
+                        <div style="color: var(--accent-danger); font-weight: 700; font-size: 0.9rem; margin-bottom: 0.4rem;">
+                            ⚠️ Sách trả quá hạn — Cần thanh toán phí
+                        </div>
+                        <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.25rem;">
+                            <span style="color:var(--text-secondary);">Lý do:</span>
+                            <span style="color:var(--text-primary); font-weight:600;"
+                                  th:text="${detail0.fine.reason}">—</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; font-size:0.85rem;">
+                            <span style="color:var(--text-secondary);">Số tiền phạt:</span>
+                            <span style="color:var(--accent-danger); font-weight:700; font-size:1rem;"
+                                  th:text="${#numbers.formatDecimal(detail0.fine.amount, 0, 'COMMA', 0, 'POINT') + ' VND'}">0 VND</span>
+                        </div>
+                    </div>
+                    <!-- Nút xác nhận thanh toán -->
+                    <form th:action="@{/borrows/{id}/pay-fine(id=${request.id})}" method="POST">
+                        <button type="submit" class="btn btn-success"
+                                onclick="return confirm('Xác nhận độc giả đã thanh toán tiền phạt?')">
+                            💰 Xác nhận đã thanh toán
+                        </button>
+                    </form>
+                </div>
+
+                <!-- === CASE C: Đã trả — không có phí hoặc đã thanh toán (hiếm gặp, backend tự RETURNED) === -->
+                <div th:if="${detail0 != null and detail0.returnDate != null and (detail0.fine == null or detail0.fine.paid)}"
+                     style="color: var(--accent-success); font-weight: 600; font-size: 0.9rem;">
+                    ✅ Đã hoàn tất trả sách
+                </div>
+
             </div>
         </div>
 

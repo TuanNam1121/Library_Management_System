@@ -121,8 +121,8 @@
 
                             <!-- Borrow request button (UC04) -->
                             <div>
-                                <div th:if="${session.loginUser != null}">
-                                    <form th:if="${session.loginUser.role == 'READER'}" th:action="@{/borrows/request/{bookId}(bookId=${book.id})}" method="POST" style="display: inline;">
+                                <div th:if="${session.loggedInUser != null}">
+                                    <form th:if="${session.userRole == 'READER'}" th:action="@{/borrows/request/{bookId}(bookId=${book.id})}" method="POST" style="display: inline;">
                                         <button id="borrowBtn" type="submit" class="btn btn-success"
                                             th:disabled="${book.availableQuantity == null or book.availableQuantity <= 0}"
                                             th:style="${(book.availableQuantity != null and book.availableQuantity > 0) ? '' : 'opacity:0.5;cursor:not-allowed;'}">
@@ -130,11 +130,11 @@
                                             <span th:unless="${book.availableQuantity != null and book.availableQuantity > 0}">Sách không khả dụng</span>
                                         </button>
                                     </form>
-                                    <span th:if="${session.loginUser.role != 'READER'}" class="btn btn-outline" style="opacity:0.6; cursor:default;">
+                                    <span th:if="${session.userRole != 'READER'}" class="btn btn-outline" style="opacity:0.6; cursor:default;">
                                         Dành cho Độc giả
                                     </span>
                                 </div>
-                                <div th:unless="${session.loginUser != null}">
+                                <div th:unless="${session.loggedInUser != null}">
                                     <a th:href="@{/auths/login}" class="btn btn-primary">🔑 Đăng nhập để mượn sách</a>
                                 </div>
                             </div>

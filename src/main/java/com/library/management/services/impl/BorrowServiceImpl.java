@@ -150,7 +150,7 @@ public class BorrowServiceImpl implements BorrowService {
     }
 
     @Override
-    public void recordReturn(Long requestId) {
+    public boolean recordReturn(Long requestId) {
         BorrowRequest request = borrowRequestRepository.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy yêu cầu mượn với id: " + requestId));
 
@@ -164,7 +164,7 @@ public class BorrowServiceImpl implements BorrowService {
         if (request.getDetails() != null) {
             for (BorrowDetail detail : request.getDetails()) {
                 detail.setReturnDate(now);
-                
+
                 // Calculate fine
                 long overdueSeconds = java.time.Duration.between(detail.getDueDate(), now).toSeconds();
                 if (overdueSeconds > 60) {
@@ -199,6 +199,7 @@ public class BorrowServiceImpl implements BorrowService {
         }
 
         borrowRequestRepository.save(request);
+        return hasFine;
     }
 
     @Override

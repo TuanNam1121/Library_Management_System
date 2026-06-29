@@ -26,16 +26,17 @@ public class BorrowController {
     // UC04 - Reader Submit Borrow Request
     @PostMapping("/request/{bookId}")
     public String submitBorrowRequest(@PathVariable Long bookId, HttpSession session) {
-        LoginedUserDTO loginUser = (LoginedUserDTO) session.getAttribute("loginUser");
-        if (loginUser == null) {
+        String loggedInUser = (String) session.getAttribute("loggedInUser");
+        String userRole = (String) session.getAttribute("userRole");
+        if (loggedInUser == null) {
             return "redirect:/auths/login";
         }
-        if (!"READER".equals(loginUser.getRole())) {
+        if (!"READER".equals(userRole)) {
             return "redirect:/books/" + bookId + "?borrowError=" + URLEncoder.encode("Chỉ có Độc giả mới có quyền mượn sách", StandardCharsets.UTF_8);
         }
 
         try {
-            borrowService.createBorrowRequest(loginUser.getName(), bookId);
+            borrowService.createBorrowRequest(loggedInUser, bookId);
             return "redirect:/books/" + bookId + "?borrowSuccess=true";
         } catch (RuntimeException ex) {
             return "redirect:/books/" + bookId + "?borrowError=" + URLEncoder.encode(ex.getMessage(), StandardCharsets.UTF_8);
@@ -45,15 +46,16 @@ public class BorrowController {
     // UC05 - Reader View Borrow History
     @GetMapping("/history")
     public String viewBorrowHistory(HttpSession session, Model model) {
-        LoginedUserDTO loginUser = (LoginedUserDTO) session.getAttribute("loginUser");
+        String loginUser = (String) session.getAttribute("loggedInUser");
+        String userRole = (String) session.getAttribute("userRole");
         if (loginUser == null) {
             return "redirect:/auths/login";
         }
-        if (!"READER".equals(loginUser.getRole())) {
+        if (!"READER".equals(userRole)) {
             return "redirect:/books";
         }
 
-        List<BorrowRequest> history = borrowService.getBorrowHistory(loginUser.getName());
+        List<BorrowRequest> history = borrowService.getBorrowHistory(loginUser);
         model.addAttribute("requests", history);
         return "borrows/history";
     }
@@ -61,11 +63,12 @@ public class BorrowController {
     // UC06 - Librarian View Pending Borrow Requests
     @GetMapping("/requests")
     public String viewPendingRequests(HttpSession session, Model model) {
-        LoginedUserDTO loginUser = (LoginedUserDTO) session.getAttribute("loginUser");
+        String loginUser = (String) session.getAttribute("loggedInUser");
+        String userRole = (String) session.getAttribute("userRole");
         if (loginUser == null) {
             return "redirect:/auths/login";
         }
-        if (!"LIBRARIAN".equals(loginUser.getRole())) {
+        if (!"LIBRARIAN".equals(userRole)) {
             return "redirect:/books";
         }
 
@@ -77,11 +80,12 @@ public class BorrowController {
     // UC06 - Librarian View All Borrow Requests
     @GetMapping("/management")
     public String viewAllRequests(HttpSession session, Model model) {
-        LoginedUserDTO loginUser = (LoginedUserDTO) session.getAttribute("loginUser");
+        String loginUser = (String) session.getAttribute("loggedInUser");
+        String userRole = (String) session.getAttribute("userRole");
         if (loginUser == null) {
             return "redirect:/auths/login";
         }
-        if (!"LIBRARIAN".equals(loginUser.getRole())) {
+        if (!"LIBRARIAN".equals(userRole)) {
             return "redirect:/books";
         }
 
@@ -93,7 +97,8 @@ public class BorrowController {
     // UC06 - Librarian View Borrow Details
     @GetMapping("/{id}")
     public String viewBorrowDetails(@PathVariable Long id, HttpSession session, Model model) {
-        LoginedUserDTO loginUser = (LoginedUserDTO) session.getAttribute("loginUser");
+        String loginUser = (String) session.getAttribute("loggedInUser");
+        String userRole = (String) session.getAttribute("userRole");
         if (loginUser == null) {
             return "redirect:/auths/login";
         }
@@ -101,7 +106,7 @@ public class BorrowController {
         BorrowRequest request = borrowService.getRequestById(id);
         
         // Security check: reader can only see their own requests
-        if ("READER".equals(loginUser.getRole()) && !request.getReader().getUsername().equals(loginUser.getName())) {
+        if ("READER".equals(userRole) && !request.getReader().getUsername().equals(loginUser)) {
             return "redirect:/books";
         }
 
@@ -112,16 +117,17 @@ public class BorrowController {
     // UC06 - Librarian Approve Request
     @PostMapping("/{id}/approve")
     public String approveRequest(@PathVariable Long id, HttpSession session) {
-        LoginedUserDTO loginUser = (LoginedUserDTO) session.getAttribute("loginUser");
+        String loginUser = (String) session.getAttribute("loggedInUser");
+        String userRole = (String) session.getAttribute("userRole");
         if (loginUser == null) {
             return "redirect:/auths/login";
         }
-        if (!"LIBRARIAN".equals(loginUser.getRole())) {
+        if (!"LIBRARIAN".equals(userRole)) {
             return "redirect:/books";
         }
 
         try {
-            borrowService.approveRequest(id, loginUser.getName());
+            borrowService.approveRequest(id, loginUser);
             return "redirect:/borrows/" + id + "?success=approved";
         } catch (RuntimeException ex) {
             return "redirect:/borrows/" + id + "?error=" + URLEncoder.encode(ex.getMessage(), StandardCharsets.UTF_8);
@@ -131,16 +137,17 @@ public class BorrowController {
     // UC06 - Librarian Reject Request
     @PostMapping("/{id}/reject")
     public String rejectRequest(@PathVariable Long id, HttpSession session) {
-        LoginedUserDTO loginUser = (LoginedUserDTO) session.getAttribute("loginUser");
+        String loginUser = (String) session.getAttribute("loggedInUser");
+        String userRole = (String) session.getAttribute("userRole");
         if (loginUser == null) {
             return "redirect:/auths/login";
         }
-        if (!"LIBRARIAN".equals(loginUser.getRole())) {
+        if (!"LIBRARIAN".equals(userRole)) {
             return "redirect:/books";
         }
 
         try {
-            borrowService.rejectRequest(id, loginUser.getName());
+            borrowService.rejectRequest(id, loginUser);
             return "redirect:/borrows/" + id + "?success=rejected";
         } catch (RuntimeException ex) {
             return "redirect:/borrows/" + id + "?error=" + URLEncoder.encode(ex.getMessage(), StandardCharsets.UTF_8);
@@ -150,16 +157,21 @@ public class BorrowController {
     // UC07 - Librarian Record Return
     @PostMapping("/{id}/return")
     public String recordReturn(@PathVariable Long id, HttpSession session) {
-        LoginedUserDTO loginUser = (LoginedUserDTO) session.getAttribute("loginUser");
+        String loginUser = (String) session.getAttribute("loggedInUser");
+        String userRole = (String) session.getAttribute("userRole");
         if (loginUser == null) {
             return "redirect:/auths/login";
         }
-        if (!"LIBRARIAN".equals(loginUser.getRole())) {
+        if (!"LIBRARIAN".equals(userRole)) {
             return "redirect:/books";
         }
 
         try {
-            borrowService.recordReturn(id);
+            boolean hasFine = borrowService.recordReturn(id);
+            if (hasFine) {
+                // Has unpaid fine — stay on page to show fine info and payment button
+                return "redirect:/borrows/" + id + "?success=returnedWithFine";
+            }
             return "redirect:/borrows/" + id + "?success=returned";
         } catch (RuntimeException ex) {
             return "redirect:/borrows/" + id + "?error=" + URLEncoder.encode(ex.getMessage(), StandardCharsets.UTF_8);
@@ -169,11 +181,12 @@ public class BorrowController {
     // UC07 - Librarian Confirm Payment
     @PostMapping("/{id}/pay-fine")
     public String payFine(@PathVariable Long id, HttpSession session) {
-        LoginedUserDTO loginUser = (LoginedUserDTO) session.getAttribute("loginUser");
+        String loginUser = (String) session.getAttribute("loggedInUser");
+        String userRole = (String) session.getAttribute("userRole");
         if (loginUser == null) {
             return "redirect:/auths/login";
         }
-        if (!"LIBRARIAN".equals(loginUser.getRole())) {
+        if (!"LIBRARIAN".equals(userRole)) {
             return "redirect:/books";
         }
 

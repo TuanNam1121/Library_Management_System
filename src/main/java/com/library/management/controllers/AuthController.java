@@ -59,27 +59,17 @@ public class AuthController {
         try {
             User user = userService.login(dto);
 
-
             if (!dto.getUsername().equals(user.getUsername()) || !dto.getPassword().equals(user.getPassword())) {
                 result.reject("loginError", "Invalid username or password");
                 return "auths/login";
             }
-
-
             // Lưu thông tin vào session
             session.setAttribute("loggedInUser", user.getUsername());
             session.setAttribute("userRole", user.getRole() != null ? user.getRole().getName() : "READER");
 
-
         } catch (RuntimeException ex) {
             result.reject("loginError", ex.getMessage());
             return "auths/login";
-        }
-
-        // Redirect theo role
-        String role = (String) session.getAttribute("userRole");
-        if (role != null && (role.equalsIgnoreCase("ADMIN") || role.equalsIgnoreCase("LIBRARIAN"))) {
-            return "redirect:/admin/dashboard";
         }
         return "redirect:/books";
     }

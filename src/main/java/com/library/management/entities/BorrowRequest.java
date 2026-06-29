@@ -14,24 +14,18 @@ import java.util.List;
 @Setter
 public class BorrowRequest extends BaseEntity{
 
-
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
-
-
 
     @ManyToOne
     @JoinColumn(name="reader_id")
     private User reader;
 
 
-
     @ManyToOne
     @JoinColumn(name="approved_by")
     private User librarian;
-
-
 
     @Enumerated(EnumType.STRING)
     private BorrowStatus status;
