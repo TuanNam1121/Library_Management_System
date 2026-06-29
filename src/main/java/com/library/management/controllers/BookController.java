@@ -15,6 +15,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import jakarta.servlet.http.HttpSession;
 
 import java.util.List;
 
@@ -66,7 +67,10 @@ public class BookController {
     }
 
     @GetMapping("/new")
-    public String showAddForm(Model model) {
+    public String showAddForm(Model model, HttpSession session) {
+        if (!"ADMIN".equals(session.getAttribute("userRole"))) {
+            return "redirect:/books?error=unauthorized";
+        }
         if (!model.containsAttribute("form")) {
             model.addAttribute("form", new BookFormDTO());
         }
@@ -76,7 +80,10 @@ public class BookController {
     }
 
     @PostMapping("/new")
-    public String createBook(@ModelAttribute BookFormDTO form, RedirectAttributes ra) {
+    public String createBook(@ModelAttribute BookFormDTO form, RedirectAttributes ra, HttpSession session) {
+        if (!"ADMIN".equals(session.getAttribute("userRole"))) {
+            return "redirect:/books?error=unauthorized";
+        }
         try {
             BookReturnDTO created = bookService.createBook(form);
             ra.addFlashAttribute("successMessage", "Đã thêm sách \"" + created.getTitle() + "\" thành công!");
@@ -89,7 +96,10 @@ public class BookController {
     }
 
     @GetMapping("/{id}/edit")
-    public String showEditForm(@PathVariable Long id, Model model) {
+    public String showEditForm(@PathVariable Long id, Model model, HttpSession session) {
+        if (!"ADMIN".equals(session.getAttribute("userRole"))) {
+            return "redirect:/books?error=unauthorized";
+        }
         try {
             BookReturnDTO book = bookService.getBookByIdForAdmin(id);
             if (!model.containsAttribute("form")) {
@@ -114,7 +124,10 @@ public class BookController {
     }
 
     @PostMapping("/{id}/edit")
-    public String updateBook(@PathVariable Long id, @ModelAttribute BookFormDTO form, RedirectAttributes ra) {
+    public String updateBook(@PathVariable Long id, @ModelAttribute BookFormDTO form, RedirectAttributes ra, HttpSession session) {
+        if (!"ADMIN".equals(session.getAttribute("userRole"))) {
+            return "redirect:/books?error=unauthorized";
+        }
         try {
             BookReturnDTO updated = bookService.updateBook(id, form);
             ra.addFlashAttribute("successMessage", "Đã cập nhật sách \"" + updated.getTitle() + "\"!");
@@ -129,7 +142,10 @@ public class BookController {
     }
 
     @PostMapping("/{id}/delete")
-    public String deleteBook(@PathVariable Long id, RedirectAttributes ra) {
+    public String deleteBook(@PathVariable Long id, RedirectAttributes ra, HttpSession session) {
+        if (!"ADMIN".equals(session.getAttribute("userRole"))) {
+            return "redirect:/books?error=unauthorized";
+        }
         try {
             bookService.deleteBook(id);
             ra.addFlashAttribute("successMessage", "Đã xóa sách thành công.");
