@@ -26,19 +26,33 @@ public class ProfileController {
         if (username == null) return "redirect:/auths/login";
 
         User user = userService.getByUsername(username);
+
+        UpdateProfileDTO dto = new UpdateProfileDTO();
+        dto.setPhone(user.getPhone());
+        dto.setAddress(user.getAddress());
+
         model.addAttribute("user", user);
-        model.addAttribute("updateProfileDTO", new UpdateProfileDTO());
+        model.addAttribute("updateProfileDTO", dto);
         model.addAttribute("changePasswordDTO", new ChangePasswordDTO());
+
         return "profile/index";
     }
 
     @PostMapping("/update")
     public String updateProfile(HttpSession session,
-                                @ModelAttribute("updateProfileDTO") UpdateProfileDTO dto,
+                                @Valid @ModelAttribute("updateProfileDTO") UpdateProfileDTO dto,
+                                BindingResult bindingResul ,
+                                Model model,
                                 RedirectAttributes redirectAttributes) {
         String username = (String) session.getAttribute("loggedInUser");
         if (username == null) return "redirect:/auths/login";
-
+        if (bindingResul.hasErrors()) {
+            User user = userService.getByUsername(username);
+            model.addAttribute("user", user);
+            model.addAttribute("updateProfileDTO", dto);
+            model.addAttribute("changePasswordDTO", new ChangePasswordDTO());
+            return "profile/index";
+        }
         try {
             userService.updateProfile(username, dto);
             redirectAttributes.addFlashAttribute("successMsg", "Cập nhật thông tin thành công!");

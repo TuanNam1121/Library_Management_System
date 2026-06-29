@@ -74,11 +74,9 @@ public class UserServiceImpl implements UserService {
     public void updateProfile(String username, UpdateProfileDTO dto) {
         User user = getByUsername(username);
 
-        if (dto.getFullName() != null) user.setFullName(dto.getFullName());
-        if (dto.getEmail() != null) user.setEmail(dto.getEmail());
+
         if (dto.getPhone() != null) user.setPhone(dto.getPhone());
         if (dto.getAddress() != null) user.setAddress(dto.getAddress());
-        if (dto.getDob() != null) user.setDob(dto.getDob());
 
         // Handle avatar upload
         MultipartFile avatarFile = dto.getAvatarFile();

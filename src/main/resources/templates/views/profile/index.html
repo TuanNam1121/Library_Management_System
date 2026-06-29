@@ -79,7 +79,7 @@
 
                 <!-- ===== TAB 1: UPDATE PROFILE ===== -->
                 <div class="tab-panel active" id="tab-info">
-                    <form th:action="@{/profile/update}" method="post" enctype="multipart/form-data"
+                    <form th:action="@{/profile/update}" th:object="${updateProfileDTO}" method="post"  enctype="multipart/form-data"
                           class="profile-form">
 
                         <!-- Avatar Upload -->
@@ -104,32 +104,46 @@
                             <div class="form-field">
                                 <label class="form-label" for="fullName">Họ và tên</label>
                                 <input class="form-input" type="text" id="fullName" name="fullName"
-                                       th:value="${user.fullName}" placeholder="Nhập họ và tên..."/>
+                                       th:value="${user.fullName}" placeholder="Nhập họ và tên..." readonly/>
                             </div>
                             <div class="form-field">
                                 <label class="form-label" for="email">Email</label>
                                 <input class="form-input" type="email" id="email" name="email"
-                                       th:value="${user.email}" placeholder="Nhập email..."/>
+                                       th:value="${user.email}" placeholder="Nhập email..." readonly/>
                             </div>
                         </div>
 
                         <div class="form-row-2">
                             <div class="form-field">
                                 <label class="form-label" for="phone">Số điện thoại</label>
-                                <input class="form-input" type="tel" id="phone" name="phone"
-                                       th:value="${user.phone}" placeholder="Nhập số điện thoại..."/>
+
+                                <input class="form-input"
+                                       type="tel"
+                                       id="phone"
+                                       th:field="*{phone}"
+                                       placeholder="Nhập số điện thoại..."/>
+
+                                <div class="text-danger"
+                                     th:if="${#fields.hasErrors('phone')}"
+                                     th:errors="*{phone}">
+                                </div>
                             </div>
+
                             <div class="form-field">
                                 <label class="form-label" for="dob">Ngày sinh</label>
-                                <input class="form-input" type="date" id="dob" name="dob"
-                                       th:value="${user.dob}"/>
+
+                                <input class="form-input"
+                                       type="date"
+                                       id="dob"
+                                       th:value="${user.dob}"
+                                       disabled/>
                             </div>
                         </div>
 
                         <div class="form-field">
                             <label class="form-label" for="address">Địa chỉ</label>
                             <input class="form-input" type="text" id="address" name="address"
-                                   th:value="${user.address}" placeholder="Nhập địa chỉ..."/>
+                                   th:value="${user.address}" placeholder="Nhập địa chỉ..." />
                         </div>
 
                         <div style="margin-top: 1.5rem;">

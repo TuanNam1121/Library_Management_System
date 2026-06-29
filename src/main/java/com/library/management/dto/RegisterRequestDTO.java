@@ -18,19 +18,28 @@ public class RegisterRequestDTO {
     private String username;
 
     @NotBlank(message = "Password is required")
+    @Size(min = 6, max = 50)
     private String password;
 
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")
+    @Size(min = 5, max = 100)
     private String email;
 
     @NotBlank(message = "Full name is required")
+    @Size(min = 5, max = 100,message = "full name must be 5 and 100 characters")
     private String fullName;
 
-    @NotBlank(message = "phone is required")
+    @NotBlank(message = "phone is required" )
+    @Pattern(
+            regexp = "^0\\d{9}$",
+            message = "Phone number must start with 0 and contain 10-11 digits"
+    )
     private String phone;
 
     @NotBlank(message = "address is required")
+    @Size(min = 5, max = 255,
+    message = "Address must be between 5 and 255 characters")
     private String address;
 
     @NotNull(message = "Day of birth is required")
