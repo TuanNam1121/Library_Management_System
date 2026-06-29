@@ -2,18 +2,14 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <th:block th:replace="~{fragments/common :: head(title='Danh sách Thể loại - LibraryHub', description='Quản lý danh sách thể loại sách')}"></th:block>
-    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-    <!-- Ensure library.css overrides Bootstrap defaults for dark theme consistency -->
     <link href="/css/library.css" rel="stylesheet">
 </head>
 <body>
 
-<!-- ===== NAVBAR ===== -->
 <nav th:replace="~{fragments/common :: navbar}"></nav>
 
-<!-- ===== HERO BANNER ===== -->
 <section class="hero-section">
     <div class="container" style="position: relative; z-index: 1;">
         <h1 class="hero-title">Quản lý <span>Thể loại Sách</span></h1>
@@ -24,11 +20,9 @@
     </div>
 </section>
 
-<!-- ===== MAIN CONTENT ===== -->
 <main class="section-wrapper">
     <div class="container">
-        <!-- Success Alerts -->
-        <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show mb-4 shadow-lg" role="alert" 
+        <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show mb-4 shadow-lg" role="alert"
              style="max-width: 1100px; margin: 0 auto; background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: var(--accent-success);">
             <strong>Thành công!</strong> Đã thêm thể loại mới vào danh sách.
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -44,7 +38,6 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
 
-        <!-- Categories Table Container -->
         <div class="search-form-wrapper" style="max-width: 1100px; margin: 0 auto; padding: 2rem;">
             <div class="table-responsive">
                 <table class="table mb-0" style="color: var(--text-primary);">
@@ -57,7 +50,6 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Categories List -->
                         <tr th:each="cat : ${categories}" style="border-bottom: 1px solid var(--glass-border);">
                             <td style="color: var(--text-secondary); border: none; vertical-align: middle;" th:text="${cat.id}">1</td>
                             <td style="font-weight: 700; color: var(--text-primary); border: none; vertical-align: middle;" th:text="${cat.name}">Tên thể loại</td>
@@ -76,7 +68,6 @@
                                 </div>
                             </td>
                         </tr>
-                        <!-- Empty State -->
                         <tr th:if="${#lists.isEmpty(categories)}">
                             <td colspan="4" class="text-center py-5" style="border: none;">
                                 <div class="empty-state" style="padding: 2rem 1rem;">
@@ -94,10 +85,8 @@
     </div>
 </main>
 
-<!-- ===== FOOTER ===== -->
 <footer th:replace="~{fragments/common :: footer}"></footer>
 
-<!-- Bootstrap 5 JS Bundle -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
         crossorigin="anonymous"></script>

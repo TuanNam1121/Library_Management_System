@@ -26,6 +26,7 @@
             <!-- Nav links: READER (UC02, UC05) -->
             <div th:if="${session.loggedInUser != null and session.userRole == 'READER'}" class="nav-links">
                 <a class="nav-link" th:href="@{/books}">Tìm sách</a>
+                <a class="nav-link" th:href="@{/categories}">Thể loại</a>
                 <a class="nav-link" th:href="@{/borrows/history}">Lịch sử mượn</a>
             </div>
 
@@ -45,6 +46,7 @@
             <!-- Nav links: Guest (chưa đăng nhập) -->
             <div th:if="${session.loggedInUser == null}" class="nav-links">
                 <a class="nav-link" th:href="@{/books}">Tìm sách</a>
+                <a class="nav-link" th:href="@{/categories}">Thể loại</a>
             </div>
 
             <!-- Nav actions -->

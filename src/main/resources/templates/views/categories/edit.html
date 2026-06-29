@@ -2,21 +2,16 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <th:block th:replace="~{fragments/common :: head(title='Chỉnh sửa Thể loại - LibraryHub', description='Form chỉnh sửa thông tin thể loại sách')}"></th:block>
-    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-    <!-- Ensure library.css overrides Bootstrap defaults for dark theme consistency -->
     <link href="/css/library.css" rel="stylesheet">
 </head>
 <body>
 
-<!-- ===== NAVBAR ===== -->
 <nav th:replace="~{fragments/common :: navbar}"></nav>
 
-<!-- ===== MAIN CONTENT ===== -->
 <main class="container mt-5 mb-5" style="min-height: calc(100vh - 220px); display: flex; align-items: center; justify-content: center;">
     <div class="row w-100 d-flex justify-content-center">
-        <!-- Glassmorphism Container Matching Project Design -->
         <div class="col-md-7 search-form-wrapper" style="max-width: 650px; padding: 2.5rem; margin: 2rem auto;">
             <h2 class="mb-2 text-center" style="font-weight: 800; color: var(--text-primary); letter-spacing: -0.02em;">✏️ CHỈNH SỬA THỂ LOẠI</h2>
             <p class="text-center mb-5" style="color: var(--text-secondary); font-size: 0.95rem;">Cập nhật thông tin chi tiết của thể loại sách</p>
@@ -41,10 +36,8 @@
     </div>
 </main>
 
-<!-- ===== FOOTER ===== -->
 <footer th:replace="~{fragments/common :: footer}"></footer>
 
-<!-- Bootstrap 5 JS Bundle -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
         crossorigin="anonymous"></script>

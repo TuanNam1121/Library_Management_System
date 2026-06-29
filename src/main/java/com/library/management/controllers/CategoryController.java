@@ -16,9 +16,6 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
-    /**
-     * Hiển thị danh sách các thể loại có sẵn
-     */
     @GetMapping("")
     public String listCategories(Model model) {
         List<Category> categories = categoryService.getAllCategories();
@@ -26,27 +23,20 @@ public class CategoryController {
         return "categories/list";
     }
 
-    /**
-     * Hiển thị form tạo thể loại mới
-     */
+    //create
     @GetMapping("/create")
     public String showCreateForm(Model model) {
         model.addAttribute("category", new Category());
         return "categories/create";
     }
 
-    /**
-     * Xử lý lưu thể loại mới vào database
-     */
     @PostMapping("/create")
     public String createCategory(@ModelAttribute Category category) {
         categoryService.createCategory(category);
         return "redirect:/categories?success=true";
     }
 
-    /**
-     * Hiển thị form chỉnh sửa thể loại
-     */
+    //edit
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable Long id, Model model) {
         Category category = categoryService.getCategoryById(id);
@@ -54,18 +44,13 @@ public class CategoryController {
         return "categories/edit";
     }
 
-    /**
-     * Xử lý cập nhật thể loại
-     */
     @PostMapping("/edit/{id}")
     public String updateCategory(@PathVariable Long id, @ModelAttribute Category category) {
         categoryService.updateCategory(id, category);
         return "redirect:/categories?updated=true";
     }
 
-    /**
-     * Xử lý xóa thể loại
-     */
+    //delete
     @GetMapping("/delete/{id}")
     public String deleteCategory(@PathVariable Long id) {
         categoryService.deleteCategory(id);
