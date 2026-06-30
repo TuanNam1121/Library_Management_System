@@ -16,6 +16,11 @@
             <h2 class="mb-2 text-center" style="font-weight: 800; color: var(--text-primary); letter-spacing: -0.02em;">➕ THÊM THỂ LOẠI MỚI</h2>
             <p class="text-center mb-5" style="color: var(--text-secondary); font-size: 0.95rem;">Điền thông tin chi tiết để thêm một thể loại sách vào hệ thống</p>
 
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
             <form th:action="@{/categories/create}" th:object="${category}" method="post">
                 <div class="mb-4">
                     <label class="form-label fw-bold" style="color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em;">Tên Thể Loại <span class="text-danger">*</span></label>
