@@ -28,12 +28,18 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public Category createCategory(Category category) {
+        if (categoryRepository.existsByName(category.getName())) {
+            throw new RuntimeException("Tên thể loại '" + category.getName() + "' đã tồn tại!");
+        }
         return categoryRepository.save(category);
     }
 
     @Override
     @Transactional
     public Category updateCategory(Long id, Category category) {
+        if (categoryRepository.existsByNameAndIdNot(category.getName(), id)) {
+            throw new RuntimeException("Tên thể loại '" + category.getName() + "' đã tồn tại!");
+        }
         Category existingCategory = getCategoryById(id);
         existingCategory.setName(category.getName());
         existingCategory.setDescription(category.getDescription());

@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -31,9 +32,14 @@ public class CategoryController {
     }
 
     @PostMapping("/create")
-    public String createCategory(@ModelAttribute Category category) {
-        categoryService.createCategory(category);
-        return "redirect:/categories?success=true";
+    public String createCategory(@ModelAttribute Category category, RedirectAttributes redirectAttributes) {
+        try {
+            categoryService.createCategory(category);
+            return "redirect:/categories?success=true";
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/categories/create";
+        }
     }
 
     //edit
@@ -45,9 +51,14 @@ public class CategoryController {
     }
 
     @PostMapping("/edit/{id}")
-    public String updateCategory(@PathVariable Long id, @ModelAttribute Category category) {
-        categoryService.updateCategory(id, category);
-        return "redirect:/categories?updated=true";
+    public String updateCategory(@PathVariable Long id, @ModelAttribute Category category, RedirectAttributes redirectAttributes) {
+        try {
+            categoryService.updateCategory(id, category);
+            return "redirect:/categories?updated=true";
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/categories/edit/" + id;
+        }
     }
 
     //delete
