@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head(title='Readers - LibraryHub', description='reader list')}"></head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav th:replace="~{fragments/common :: navbar}"></nav>
+
+<!-- ===== HERO / SEARCH ===== -->
+<section class="hero-section">
+    <div class="container" style="position: relative; z-index: 1;">
+
+        <!-- UC02: Search Form -->
+        <form th:action="@{/readers}" method="get" id="searchForm" class="search-form-wrapper">
+            <div class="search-row">
+                <!-- Keyword search -->
+                <input
+                        id="keywordInput"
+                        type="text"
+                        name="keyword"
+                        class="search-input"
+                        placeholder="Search by username, name, phone"
+                        th:value="${keyword}"
+                />
+
+                <button id="searchBtn" type="submit" class="btn btn-primary">
+                    Tìm kiếm
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- ===== RESULTS ===== -->
+<main class="section-wrapper">
+    <div class="container" >
+
+
+        <!-- Flash messages -->
+        <div th:if="${successMessage}" style="background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.3);color:#22c55e;padding:0.9rem 1.25rem;border-radius:12px;margin-bottom:1rem;" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" style="background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);color:#ef4444;padding:0.9rem 1.25rem;border-radius:12px;margin-bottom:1rem;" th:text="${errorMessage}"></div>
+
+        <div class="card-body p-0" style="border-radius:20px">
+
+            <table class="table table-dark table-hover align-middle mb-0">
+
+                <thead>
+                <tr class="text-center">
+                    <th>Avatar</th>
+                    <th>Username</th>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Address</th>
+                    <th>Date of Birth</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+
+                <tbody>
+
+                <tr th:if="${#lists.isEmpty(readers)}">
+                    <td colspan="9" class="text-center text-secondary py-4">
+                        No readers found.
+                    </td>
+                </tr>
+
+                <tr th:each="reader : ${readers}">
+
+
+                    <td class="text-center">
+
+                        <img th:if="${reader.avatar != null}"
+                             th:src="${reader.avatar}"
+                             width="50"
+                             height="50"
+                             class="rounded-circle border object-fit-cover"/>
+
+                        <span th:if="${reader.avatar == null}"
+                              class="text-secondary">
+                            No Image
+                        </span>
+
+                    </td>
+
+                    <td th:text="${reader.username}"></td>
+
+                    <td th:text="${reader.fullName}"></td>
+
+                    <td th:text="${reader.email}"></td>
+
+                    <td th:text="${reader.phone}"></td>
+
+                    <td th:text="${reader.address}"></td>
+
+                    <td th:text="${reader.dob}"></td>
+
+                    <td class="text-center">
+
+                        <span th:if="${reader.enabled}"
+                              class="badge bg-success">
+                            Active
+                        </span>
+
+                        <span th:unless="${reader.enabled}"
+                              class="badge bg-danger">
+                            Disabled
+                        </span>
+
+                    </td>
+                    <td>
+                        <a th:href="@{/readers/view/{id}(id=${reader.id})}"
+                           class="btn btn-info btn-sm">
+                            View
+                        </a>
+
+                        <a th:href="@{/readers/edit/{id}(id=${reader.id})}"
+                           class="btn btn-warning btn-sm">
+                            Edit
+                        </a>
+
+                        <a th:if="${reader.enabled}"
+                           th:href="@{/readers/deactivate/{id}(id=${reader.id})}"
+                           class="btn btn-danger btn-sm"
+                           onclick="return confirm('Deactivate this reader?')">
+                            Deactivate
+                        </a>
+
+                        <a th:unless="${reader.enabled}"
+                           th:href="@{/readers/activate/{id}(id=${reader.id})}"
+                           class="btn btn-success btn-sm">
+                            Activate
+                        </a>
+                    </td>
+
+                </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer th:replace="~{fragments/common :: footer}"></footer>
+
+</body>
+</html>

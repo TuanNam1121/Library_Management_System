@@ -8,6 +8,7 @@ import com.library.management.enums.BookStatus;
 import com.library.management.enums.BorrowItemStatus;
 import com.library.management.enums.BorrowStatus;
 import com.library.management.repositories.BookRepository;
+import com.library.management.repositories.BorrowDetailRepository;
 import com.library.management.repositories.BorrowRequestRepository;
 import com.library.management.repositories.UserRepository;
 import com.library.management.services.BorrowService;
@@ -28,6 +29,7 @@ public class BorrowServiceImpl implements BorrowService {
     private final BorrowRequestRepository borrowRequestRepository;
     private final UserRepository userRepository;
     private final BookRepository bookRepository;
+    private final BorrowDetailRepository borrowDetailRepository;
     private final com.library.management.repositories.FineRepository fineRepository;
     private final com.library.management.repositories.BorrowDetailRepository borrowDetailRepository;
 
@@ -240,5 +242,10 @@ public class BorrowServiceImpl implements BorrowService {
         // Set request status to RETURNED
         request.setStatus(BorrowStatus.RETURNED);
         borrowRequestRepository.save(request);
+    }
+
+    @Override
+    public List<BorrowDetail> findHistoryByReader(long id) {
+        return borrowDetailRepository.findHistoryByReader(id);
     }
 }

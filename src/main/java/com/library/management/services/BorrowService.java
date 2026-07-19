@@ -16,4 +16,5 @@ public interface BorrowService {
     void rejectRequest(Long requestId, String librarianUsername);
     boolean recordReturn(Long requestId);
     void payFine(Long requestId);
+    List<BorrowDetail> findHistoryByReader(long id);
 }
