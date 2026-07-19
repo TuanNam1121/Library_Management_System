@@ -7,6 +7,7 @@ import com.library.management.dto.RegisterRequestDTO;
 import com.library.management.dto.UpdateProfileDTO;
 import com.library.management.entities.Role;
 import com.library.management.entities.User;
+import com.library.management.exception.*;
 import com.library.management.repositories.RoleRepository;
 import com.library.management.repositories.UserRepository;
 import com.library.management.services.UserService;
@@ -33,10 +34,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public void register(RegisterRequestDTO registerRequest) {
         if (userRepository.existsByUsername(registerRequest.getUsername())) {
-            throw new RuntimeException("Username already exist ");
+            throw new UsernameAlreadyExistException("Username already exist ");
         }
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
-            throw new RuntimeException("Gmail already exist ");
+            throw new GmailAlreadyExistException("Gmail already exist ");
         }
         User user = new User();
         user.setUsername(registerRequest.getUsername());
@@ -56,10 +57,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public User login(LoginRequestDTO dto) {
         User user = userRepository.findByUsername(dto.getUsername())
-                .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại"));
+                .orElseThrow(() -> new UsernameNotExistException("Tài khoản không tồn tại"));
 
         if (!user.getPassword().equals(dto.getPassword())) {
-            throw new RuntimeException("Sai tên đăng nhập hoặc mật khẩu");
+            throw new WrongPasswordOrUserNameException("Sai tên đăng nhập hoặc mật khẩu");
         }
         return user;
     }
@@ -67,7 +68,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getByUsername(String username) {
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+                .orElseThrow(() -> new UserNotFoundException("User not found: " + username));
     }
 
     @Override
@@ -93,10 +94,10 @@ public class UserServiceImpl implements UserService {
         User user = getByUsername(username);
 
         if (!user.getPassword().equals(dto.getCurrentPassword())) {
-            throw new RuntimeException("Mật khẩu hiện tại không đúng");
+            throw new WrongCurrentPasswordException("Mật khẩu hiện tại không đúng");
         }
         if (!dto.getNewPassword().equals(dto.getConfirmPassword())) {
-            throw new RuntimeException("Mật khẩu xác nhận không khớp");
+            throw new WrongComfirmPasswordException("Mật khẩu xác nhận không khớp");
         }
         user.setPassword(dto.getNewPassword());
         userRepository.save(user);
@@ -120,7 +121,7 @@ public class UserServiceImpl implements UserService {
 
             return "/uploads/avatars/" + fileName;
         } catch (IOException e) {
-            throw new RuntimeException("Không thể lưu ảnh đại diện: " + e.getMessage());
+            throw new CanNotSaveAvartaException("Không thể lưu ảnh đại diện: " + e.getMessage());
         }
     }
 
