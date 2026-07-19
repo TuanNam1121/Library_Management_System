@@ -1,5 +1,6 @@
 package com.library.management.services;
 
+import com.library.management.entities.BorrowDetail;
 import com.library.management.entities.BorrowRequest;
 
 import java.util.List;
@@ -14,4 +15,5 @@ public interface BorrowService {
     void rejectRequest(Long requestId, String librarianUsername);
     boolean recordReturn(Long requestId);
     void payFine(Long requestId);
+    List<BorrowDetail> findHistoryByReader(long id);
 }

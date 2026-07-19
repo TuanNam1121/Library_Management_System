@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/common :: head(title='Reader Details', description='Reader details')}"></head>
+
+<body>
+
+<nav th:replace="~{fragments/common :: navbar}"></nav>
+
+<main class="section-wrapper">
+
+    <div class="container">
+
+        <div class="card shadow" style="background-color:#252836">
+
+            <div class="card-header bg-dark text-white">
+                <h3 class="mb-0">Reader Information</h3>
+            </div>
+
+            <div class="card-body" style="background-color:#252836">
+
+                <div class="row" style="background-color:#252836">
+
+                    <div class="col-md-3 text-center">
+
+                        <img th:if="${reader.avatar != null}"
+                             th:src="${reader.avatar}"
+                             class="img-fluid rounded-circle border mb-3"
+                             style="width:180px;height:180px;object-fit:cover;">
+
+                        <img th:unless="${reader.avatar != null}"
+                             src="https://placehold.co/180x180?text=Avatar"
+                             class="img-fluid rounded-circle border mb-3">
+
+                    </div>
+
+                    <div class="col-md-9">
+
+                        <table class="table table-dark table-hover">
+
+                            <tr>
+                                <th width="220">ID</th>
+                                <td th:text="${reader.id}"></td>
+                            </tr>
+
+                            <tr>
+                                <th>Username</th>
+                                <td th:text="${reader.username}"></td>
+                            </tr>
+
+                            <tr>
+                                <th>Full Name</th>
+                                <td th:text="${reader.fullName}"></td>
+                            </tr>
+
+                            <tr>
+                                <th>Email</th>
+                                <td th:text="${reader.email}"></td>
+                            </tr>
+
+                            <tr>
+                                <th>Phone</th>
+                                <td th:text="${reader.phone}"></td>
+                            </tr>
+
+                            <tr>
+                                <th>Address</th>
+                                <td th:text="${reader.address}"></td>
+                            </tr>
+
+                            <tr>
+                                <th>Date of Birth</th>
+                                <td th:text="${reader.dob}"></td>
+                            </tr>
+
+                            <tr>
+                                <th>Status</th>
+
+                                <td>
+                                    <span class="badge bg-success"
+                                          th:if="${reader.enabled}">
+                                        Active
+                                    </span>
+
+                                    <span class="badge bg-danger"
+                                          th:unless="${reader.enabled}">
+                                        Disabled
+                                    </span>
+                                </td>
+
+                            </tr>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="card-footer">
+                <a th:href="@{/readers/edit/{id}(id=${reader.id})}"
+                   class="btn btn-warning">
+                    Update
+                </a>
+
+                <a th:href="@{/readers}"
+                   class="btn btn-secondary">
+                    Back
+                </a>
+
+            </div>
+
+            <h4 class="mt-5 mb-3">Borrow History</h4>
+
+            <div class="table-responsive">
+
+                <table class="table table-dark table-hover align-middle">
+
+                    <thead>
+                    <tr class="text-center">
+                        <th>#</th>
+                        <th>Book</th>
+                        <th>Borrow Date</th>
+                        <th>Due Date</th>
+                        <th>Return Date</th>
+                        <th>Status</th>
+                        <th>Fine</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+
+                    <tr th:if="${#lists.isEmpty(borrow)}">
+                        <td colspan="7" class="text-center text-secondary">
+                            This reader has no borrowing history.
+                        </td>
+                    </tr>
+
+                    <tr th:each="item, stat : ${borrow}">
+
+                        <td class="text-center"
+                            th:text="${stat.count}">
+                        </td>
+
+                        <td th:text="${item.book.title}">
+                        </td>
+
+                        <td th:text="${#temporals.format(item.borrowDate,'yyyy-MM-dd HH:mm')}">
+                        </td>
+
+                        <td th:text="${#temporals.format(item.dueDate,'yyyy-MM-dd HH:mm')}">
+                        </td>
+
+                        <td>
+                <span th:if="${item.returnDate != null}"
+                      th:text="${#temporals.format(item.returnDate,'yyyy-MM-dd HH:mm')}">
+                </span>
+
+                            <span th:unless="${item.returnDate != null}"
+                                  class="text-warning">
+                    Not Returned
+                </span>
+                        </td>
+
+                        <td>
+                <span class="badge bg-info"
+                      th:text="${item.status}">
+                </span>
+                        </td>
+
+                        <td>
+
+                <span th:if="${item.fine != null}"
+                      class="text-danger fw-bold"
+                      th:text="${item.fine.amount}">
+                </span>
+
+                            <span th:unless="${item.fine != null}"
+                                  class="text-success">
+                    None
+                </span>
+
+                        </td>
+
+                    </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+        </div>
+
+    </div>
+
+</main>
+
+<footer th:replace="~{fragments/common :: footer}"></footer>
+
+</body>
+</html>

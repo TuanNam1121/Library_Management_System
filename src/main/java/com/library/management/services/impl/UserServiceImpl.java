@@ -21,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -128,5 +129,25 @@ public class UserServiceImpl implements UserService {
     public LoginedUserDTO getLoginUser(LoginRequestDTO loginRequestDTO) {
         User user = userRepository.findUserByUsernameAndPassword(loginRequestDTO.getUsername(), loginRequestDTO.getPassword());
         return new LoginedUserDTO(user.getUsername(), user.getRole().getName(), user.getEmail());
+    }
+
+    @Override
+    public List<User> findAllReader() {
+        return userRepository.findAllReader();
+    }
+
+    @Override
+    public List<User> searchReader(String keyword) {
+        return userRepository.searchReader(keyword);
+    }
+
+    @Override
+    public void update(User user) {
+        userRepository.save(user);
+    }
+
+    @Override
+    public User findById(long id) {
+        return userRepository.findById(id);
     }
 }
