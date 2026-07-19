@@ -127,6 +127,11 @@ public class BookServiceImpl implements BookService {
         bookRepository.save(book);
     }
 
+    @Override
+    public Book findByAuthor(long id) {
+        return bookRepository.existAuthor(id);
+    }
+
     // ---- Helpers ----
 
     private void applyCategory(Book book, Long categoryId) {
