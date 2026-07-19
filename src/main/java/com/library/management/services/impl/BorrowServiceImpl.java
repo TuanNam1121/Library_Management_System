@@ -31,7 +31,6 @@ public class BorrowServiceImpl implements BorrowService {
     private final BookRepository bookRepository;
     private final BorrowDetailRepository borrowDetailRepository;
     private final com.library.management.repositories.FineRepository fineRepository;
-    private final com.library.management.repositories.BorrowDetailRepository borrowDetailRepository;
 
     @Override
     public BorrowRequest createBorrowRequest(String username, Long bookId) {
