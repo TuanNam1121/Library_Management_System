@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/common :: head(title='Sách Quá Hạn - LibraryHub', description='Danh sách các sách bạn đang mượn đã quá hạn trả')}"></th:block>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link href="/css/library.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav th:replace="~{fragments/common :: navbar}"></nav>
+
+<!-- ===== HERO BANNER ===== -->
+<section class="hero-section">
+    <div class="container" style="position: relative; z-index: 1;">
+        <h1 class="hero-title">Sách <span>Quá Hạn</span></h1>
+        <p class="hero-subtitle">Những cuốn sách bạn đang mượn đã qua hạn trả — vui lòng trả sách hoặc gia hạn sớm để tránh phí phạt</p>
+    </div>
+</section>
+
+<!-- ===== MAIN CONTENT ===== -->
+<main class="page-content">
+    <div class="container py-4">
+
+        <!-- Cảnh báo tổng quan -->
+        <div th:if="${!#lists.isEmpty(overdueBooks)}"
+             style="max-width: 1100px; margin: 0 auto 1.5rem; background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: var(--accent-danger); padding: 1rem 1.25rem; border-radius: var(--radius-sm);">
+             Bạn đang có <strong th:text="${#lists.size(overdueBooks)}">0</strong> cuốn sách quá hạn.
+        </div>
+
+        <!-- Overdue Books Table -->
+        <div class="search-form-wrapper" style="max-width: 1100px; margin: 0 auto; padding: 2rem;">
+            <div class="table-responsive">
+                <table class="table mb-0" style="color: var(--text-primary); border-color: var(--glass-border);">
+                    <thead>
+                        <tr style="border-bottom: 1px solid var(--glass-border);">
+                            <th style="width: 32%; color: var(--text-secondary); border: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Thông tin Sách</th>
+                            <th style="width: 16%; color: var(--text-secondary); border: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Ngày Mượn</th>
+                            <th style="width: 16%; color: var(--text-secondary); border: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Hạn Trả</th>
+                            <th style="width: 16%; color: var(--text-secondary); border: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Quá Hạn</th>
+                            <th style="width: 20%; color: var(--text-secondary); border: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;" class="text-center">Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="detail : ${overdueBooks}"
+                            th:with="daysOverdue=${T(java.time.temporal.ChronoUnit).DAYS.between(detail.dueDate, T(java.time.LocalDateTime).now())}"
+                            style="border-bottom: 1px solid var(--glass-border); vertical-align: middle;">
+                            <!-- Book info -->
+                            <td style="border: none;">
+                                <div style="font-weight: 700; color: var(--text-primary);" th:text="${detail.book.title}">Tên sách</div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);" th:text="${'Tác giả: ' + detail.book.author.name}">Tác giả</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);" th:text="${'ISBN: ' + detail.book.isbn}">ISBN</div>
+                            </td>
+                            <!-- Borrow date -->
+                            <td style="color: var(--text-secondary); border: none;"
+                                th:text="${detail.borrowDate != null ? #temporals.format(detail.borrowDate, 'dd/MM/yyyy HH:mm') : '—'}">--/--/----</td>
+                            <!-- Due date (red) -->
+                            <td style="border: none; color: var(--accent-danger); font-weight: 600;"
+                                th:text="${detail.dueDate != null ? #temporals.format(detail.dueDate, 'dd/MM/yyyy HH:mm') : '—'}">--/--/----</td>
+                            <!-- Overdue badge -->
+                            <td style="border: none;">
+                                <span style="color: var(--accent-danger); background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600;"
+                                      th:text="${daysOverdue > 0 ? ('Quá hạn ' + daysOverdue + ' ngày') : 'Quá hạn hôm nay'}">Quá hạn</span>
+                            </td>
+                            <!-- Actions -->
+                            <td class="text-center" style="border: none;">
+                                <a th:href="@{/borrows/{id}(id=${detail.borrowRequest.id})}" class="btn btn-outline btn-sm" style="margin-bottom: 0.25rem;">
+                                     Xem
+                                </a>
+                                <a th:href="@{/renew-requests/create/{id}(id=${detail.id})}" class="btn btn-primary btn-sm">
+                                     Gia hạn
+                                </a>
+                            </td>
+                        </tr>
+                        <!-- Empty State -->
+                        <tr th:if="${#lists.isEmpty(overdueBooks)}">
+                            <td colspan="5" class="text-center py-5" style="border: none;">
+                                <div class="empty-state" style="padding: 2rem 1rem;">
+                                    <div class="empty-state-icon" style="font-size: 2.5rem;"></div>
+                                    <h3 style="margin-top: 1rem;">Bạn không có sách nào quá hạn</h3>
+                                    <p style="color: var(--text-secondary);">Tiếp tục giữ thói quen trả sách đúng hạn nhé!</p>
+                                    <a th:href="@{/borrows/history}" class="btn btn-primary" style="margin-top: 1.5rem;">Xem lịch sử mượn</a>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer th:replace="~{fragments/common :: footer}"></footer>
+
+<!-- Bootstrap 5 JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+</body>
+</html>

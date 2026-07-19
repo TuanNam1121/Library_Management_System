@@ -4,9 +4,15 @@ import com.library.management.entities.BorrowDetail;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface BorrowDetailRepository extends JpaRepository<BorrowDetail, Long> {
     Optional<BorrowDetail> findByIdAndBorrowRequestReaderUsername(Long id, String username);
+
+    // Sách quá hạn của độc giả: chưa trả (returnDate null) và đã qua hạn trả (dueDate < now)
+    List<BorrowDetail> findByBorrowRequestReaderUsernameAndReturnDateIsNullAndDueDateBeforeOrderByDueDateAsc(
+            String username, LocalDateTime dateTime);
 }

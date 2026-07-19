@@ -1,5 +1,6 @@
 package com.library.management.services;
 
+import com.library.management.entities.BorrowDetail;
 import com.library.management.entities.BorrowRequest;
 
 import java.util.List;
@@ -7,6 +8,7 @@ import java.util.List;
 public interface BorrowService {
     BorrowRequest createBorrowRequest(String username, Long bookId);
     List<BorrowRequest> getBorrowHistory(String username);
+    List<BorrowDetail> getOverdueBooks(String username);
     List<BorrowRequest> getPendingRequests();
     List<BorrowRequest> getAllRequests();
     BorrowRequest getRequestById(Long id);
