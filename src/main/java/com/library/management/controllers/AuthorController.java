@@ -2,6 +2,7 @@ package com.library.management.controllers;
 
 import com.library.management.entities.Author;
 import com.library.management.services.AuthorService;
+import com.library.management.services.BookService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthorController {
 
     private final AuthorService authorService;
+    private final BookService bookService;
 
     @GetMapping
     public String list(Model model){
@@ -51,11 +53,17 @@ public class AuthorController {
     }
 
     @GetMapping("/delete/{id}")
-    public String delete(@PathVariable Long id){
+    public String delete(@PathVariable Long id, Model model){
 
+        if(bookService.findByAuthor(id) != null){
+            model.addAttribute("authors", authorService.findAll());
+            model.addAttribute("error", "cannot delete author "+id);
+            return "authors/list";
+        }
         authorService.delete(id);
-
-        return "redirect:/authors";
+        model.addAttribute("authors", authorService.findAll());
+        model.addAttribute("error", " deleted author "+id);
+        return "authors/list";
     }
 
 

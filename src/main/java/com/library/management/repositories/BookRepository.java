@@ -35,4 +35,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
             @Param("categoryId") Long categoryId,
             Pageable pageable
     );
+
+    @Query("FROM Book b where b.author.id = :authorID")
+    Book existAuthor(@Param("authorID") Long id);
 }

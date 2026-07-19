@@ -1,7 +1,9 @@
 package com.library.management.services.impl;
 
 import com.library.management.entities.Author;
+import com.library.management.entities.Book;
 import com.library.management.repositories.AuthorRepository;
+import com.library.management.repositories.BookRepository;
 import com.library.management.services.AuthorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,7 @@ import java.util.List;
 public class AuthorServiceImpl implements AuthorService {
 
     private final AuthorRepository authorRepository;
+    private final BookRepository bookRepository;
 
     @Override
     public List<Author> findAll() {
@@ -32,7 +35,10 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Override
     public void delete(Long id) {
-        authorRepository.deleteById(id);
+        Book book = bookRepository.existAuthor(id);
+        if(book == null){
+            authorRepository.deleteById(id);
+        }
     }
 
 }

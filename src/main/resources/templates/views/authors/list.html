@@ -27,9 +27,12 @@
             <th>Action</th>
         </tr>
         </thead>
+        <h1 th:text="${error}"></h1>
 
         <tbody>
-        <tr th:each="author : ${authors}">
+        <form th:each="author : ${authors}" th:object="${author}" th:action="@{/authors/edit}" method="post" style="background: black; color: white">
+            <tr>
+                <input type="hidden" name="id" th:value="${author.id}">
             <td th:text="${author.id}"></td>
             <td th:text="${author.name}"></td>
             <td th:text="${author.bio}"></td>
@@ -44,12 +47,11 @@
                    onclick="return confirm('Delete this author?')">
                     Delete
                 </a>
-            </td>
-        </tr>
+            </td></tr>
+        </form>
         </tbody>
 
     </table>
-
 </div>
 
 </body>
