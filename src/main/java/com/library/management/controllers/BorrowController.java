@@ -1,6 +1,7 @@
 package com.library.management.controllers;
 
 import com.library.management.dto.LoginedUserDTO;
+import com.library.management.entities.BorrowDetail;
 import com.library.management.entities.BorrowRequest;
 import com.library.management.services.BorrowService;
 import jakarta.servlet.http.HttpSession;
@@ -58,6 +59,23 @@ public class BorrowController {
         List<BorrowRequest> history = borrowService.getBorrowHistory(loginUser);
         model.addAttribute("requests", history);
         return "borrows/history";
+    }
+
+    // UC05b - Reader View Overdue Books
+    @GetMapping("/overdue")
+    public String viewOverdueBooks(HttpSession session, Model model) {
+        String loginUser = (String) session.getAttribute("loggedInUser");
+        String userRole = (String) session.getAttribute("userRole");
+        if (loginUser == null) {
+            return "redirect:/auths/login";
+        }
+        if (!"READER".equals(userRole)) {
+            return "redirect:/books";
+        }
+
+        List<BorrowDetail> overdueBooks = borrowService.getOverdueBooks(loginUser);
+        model.addAttribute("overdueBooks", overdueBooks);
+        return "borrows/overdue";
     }
 
     // UC06 - Librarian View Pending Borrow Requests

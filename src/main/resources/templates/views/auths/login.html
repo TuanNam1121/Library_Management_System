@@ -18,8 +18,13 @@
     <div class="row d-flex justify-content-center">
         <div class="col-md-5 border rounded-2 shadow-lg p-4">
             <h2 class="m-3 text-center">LMS PLATFORM LOGIN</h2>
-
-            <form th:action="@{/auths/login}" th:object="${user}" method="post">
+            <div class="alert alert-danger p-2" th:if="${loginError}">
+                <p class="mb-0" th:text="${loginError}"></p>
+            </div>
+            <div class="alert alert-success p-2" th:if="${Registersuccess}">
+                <p class="mb-0" th:text="${Registersuccess}"></p>
+            </div>
+            <form th:action="@{/auths/login}" th:object="${loginRequestDto}" method="post">
                 <div class="alert alert-danger p-2" th:if="${#fields.hasGlobalErrors()}">
                     <p class="mb-0" th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
                 </div>

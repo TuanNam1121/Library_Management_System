@@ -31,6 +31,7 @@ public class BorrowServiceImpl implements BorrowService {
     private final BookRepository bookRepository;
     private final BorrowDetailRepository borrowDetailRepository;
     private final com.library.management.repositories.FineRepository fineRepository;
+    private final com.library.management.repositories.BorrowDetailRepository borrowDetailRepository;
 
     @Override
     public BorrowRequest createBorrowRequest(String username, Long bookId) {
@@ -74,6 +75,14 @@ public class BorrowServiceImpl implements BorrowService {
     @Transactional(readOnly = true)
     public List<BorrowRequest> getBorrowHistory(String username) {
         return borrowRequestRepository.findAllByReaderUsernameOrderByRequestDateDesc(username);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<BorrowDetail> getOverdueBooks(String username) {
+        return borrowDetailRepository
+                .findByBorrowRequestReaderUsernameAndReturnDateIsNullAndDueDateBeforeOrderByDueDateAsc(
+                        username, LocalDateTime.now());
     }
 
     @Override

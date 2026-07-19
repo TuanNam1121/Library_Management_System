@@ -7,6 +7,9 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface BorrowDetailRepository extends JpaRepository<BorrowDetail, Long> {
@@ -17,4 +20,10 @@ public interface BorrowDetailRepository extends JpaRepository<BorrowDetail, Long
         ORDER BY bd.borrowDate DESC
     """)
     List<BorrowDetail> findHistoryByReader(@Param("readerId") Long readerId);
+           
+    Optional<BorrowDetail> findByIdAndBorrowRequestReaderUsername(Long id, String username);
+
+    // Sách quá hạn của độc giả: chưa trả (returnDate null) và đã qua hạn trả (dueDate < now)
+    List<BorrowDetail> findByBorrowRequestReaderUsernameAndReturnDateIsNullAndDueDateBeforeOrderByDueDateAsc(
+            String username, LocalDateTime dateTime);
 }

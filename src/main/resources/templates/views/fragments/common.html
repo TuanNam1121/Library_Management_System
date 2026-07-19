@@ -28,6 +28,7 @@
                 <a class="nav-link" th:href="@{/books}">Tìm sách</a>
                 <a class="nav-link" th:href="@{/categories}">Thể loại</a>
                 <a class="nav-link" th:href="@{/borrows/history}">Lịch sử mượn</a>
+                <a class="nav-link" th:href="@{/borrows/overdue}">Sách quá hạn</a>
             </div>
 
             <!-- Nav links: ADMIN (UC08, UC09) -->
@@ -42,6 +43,7 @@
             <div th:if="${session.loggedInUser != null and session.userRole == 'LIBRARIAN'}" class="nav-links">
                 <a class="nav-link" th:href="@{/borrows/requests}">Duyệt yêu cầu mượn</a>
                 <a class="nav-link" th:href="@{/borrows/management}">Quản lý Mượn/Trả</a>
+                <a class="nav-link" th:href="@{/librarian/renew}">Quản lý gia hạn sách</a>
             </div>
 
             <!-- Nav links: Guest (chưa đăng nhập) -->
@@ -49,6 +51,9 @@
                 <a class="nav-link" th:href="@{/books}">Tìm sách</a>
 
             </div>
+
+
+
 
             <!-- Nav actions -->
             <div class="nav-actions">

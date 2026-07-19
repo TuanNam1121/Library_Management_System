@@ -191,6 +191,14 @@
                         </span>
                     </div>
 
+                    <!-- Nút Gia hạn (chỉ READER, sách đang mượn và chưa trả) -->
+                    <div th:if="${session.userRole == 'READER' and detail.status == T(com.library.management.enums.BorrowItemStatus).BORROWING and detail.returnDate == null}"
+                         style="margin-top: 1rem; text-align: right;">
+                        <a th:href="@{/renew-requests/create/{id}(id=${detail.id})}" class="btn btn-primary btn-sm">
+                            📅 Gia hạn sách
+                        </a>
+                    </div>
+
                     <!-- Fine Info block (UC07) -->
                     <div th:if="${detail.fine != null}" style="margin-top: 1rem; padding: 1rem; background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); border-radius: var(--radius-sm);">
                         <h5 style="color: var(--accent-danger); font-weight: 700; margin-bottom: 0.5rem; font-size: 0.95rem;">⚠️ Thông tin tiền phạt</h5>

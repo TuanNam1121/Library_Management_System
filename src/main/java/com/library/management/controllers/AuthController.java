@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/auths")
@@ -29,48 +30,54 @@ public class AuthController {
     @PostMapping("/register")
     public String register(
             @Valid @ModelAttribute("user") RegisterRequestDTO dto,
-            BindingResult result) {
+            BindingResult result, RedirectAttributes redirectAttributes) {
 
         if (result.hasErrors()) {
             return "auths/register";
         }
-        try {
-            userService.register(dto);
-        } catch (RuntimeException ex) {
-            result.reject("registerError", ex.getMessage());
-            return "auths/register";
-        }
+        userService.register(dto);
+        redirectAttributes.addFlashAttribute("Registersuccess", "User has been registered successfully");
+//        try {
+//            userService.register(dto);
+//        } catch (RuntimeException ex) {
+//            result.reject("registerError", ex.getMessage());
+//            return "auths/register";
+//        }
         return "redirect:/auths/login";
     }
 
     @GetMapping("/login")
     public String loginProcess(Model model) {
-        model.addAttribute("user", new LoginRequestDTO());
+        model.addAttribute("loginRequestDto", new LoginRequestDTO());
         return "auths/login";
     }
 
     @PostMapping("/login")
-    public String login(@Valid @ModelAttribute("user") LoginRequestDTO dto,
+    public String login(@Valid @ModelAttribute("loginRequestDto") LoginRequestDTO dto,
                         BindingResult result,
-                        HttpSession session) {
+                        HttpSession session, RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
             return "auths/login";
         }
-        try {
-            User user = userService.login(dto);
-
-            if (!dto.getUsername().equals(user.getUsername()) || !dto.getPassword().equals(user.getPassword())) {
-                result.reject("loginError", "Invalid username or password");
-                return "auths/login";
-            }
-            // Lưu thông tin vào session
-            session.setAttribute("loggedInUser", user.getUsername());
-            session.setAttribute("userRole", user.getRole() != null ? user.getRole().getName() : "READER");
-
-        } catch (RuntimeException ex) {
-            result.reject("loginError", ex.getMessage());
-            return "auths/login";
-        }
+        User  user = userService.login(dto);
+        session.setAttribute("loggedInUser",user.getUsername());
+        session.setAttribute("userRole",user.getRole()!=null?user.getRole().getName():"READER");
+        redirectAttributes.addFlashAttribute("success","login successful");
+//        try {
+//            User user = userService.login(dto);
+//
+//            if (!dto.getUsername().equals(user.getUsername()) || !dto.getPassword().equals(user.getPassword())) {
+//                result.reject("loginError", "Invalid username or password");
+//                return "auths/login";
+//            }
+//            // Lưu thông tin vào session
+//            session.setAttribute("loggedInUser", user.getUsername());
+//            session.setAttribute("userRole", user.getRole() != null ? user.getRole().getName() : "READER");
+//
+//        } catch (RuntimeException ex) {
+//            result.reject("loginError", ex.getMessage());
+//            return "auths/login";
+//        }
         return "redirect:/books";
     }
 

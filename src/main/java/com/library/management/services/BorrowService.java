@@ -8,6 +8,7 @@ import java.util.List;
 public interface BorrowService {
     BorrowRequest createBorrowRequest(String username, Long bookId);
     List<BorrowRequest> getBorrowHistory(String username);
+    List<BorrowDetail> getOverdueBooks(String username);
     List<BorrowRequest> getPendingRequests();
     List<BorrowRequest> getAllRequests();
     BorrowRequest getRequestById(Long id);
