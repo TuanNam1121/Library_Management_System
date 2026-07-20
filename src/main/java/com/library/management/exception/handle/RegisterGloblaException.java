@@ -1,18 +1,23 @@
 package com.library.management.exception.handle;
 
-import com.library.management.entities.User;
-import org.springframework.http.ResponseEntity;
+import com.library.management.controllers.AuthController;
+import com.library.management.dto.RegisterRequestDTO;
+import com.library.management.exception.GmailAlreadyExistException;
+import com.library.management.exception.UsernameAlreadyExistException;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-@ControllerAdvice
+@ControllerAdvice(assignableTypes = AuthController.class)
 public class RegisterGloblaException {
-    @ExceptionHandler(RuntimeException.class)
+
+    @ExceptionHandler({
+            UsernameAlreadyExistException.class,
+            GmailAlreadyExistException.class
+    })
     public String handleException(RuntimeException ex, Model model) {
         model.addAttribute("registerError", ex.getMessage());
-        model.addAttribute("user",new User());
-        return "/auths/register";
+        model.addAttribute("user", new RegisterRequestDTO());
+        return "auths/register";
     }
-
 }

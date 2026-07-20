@@ -53,12 +53,10 @@ public class ProfileController {
             model.addAttribute("changePasswordDTO", new ChangePasswordDTO());
             return "profile/index";
         }
-        try {
+
             userService.updateProfile(username, dto);
             redirectAttributes.addFlashAttribute("successMsg", "Cập nhật thông tin thành công!");
-        } catch (RuntimeException ex) {
-            redirectAttributes.addFlashAttribute("errorMsg", ex.getMessage());
-        }
+
         return "redirect:/profile";
     }
 
