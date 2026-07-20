@@ -22,7 +22,8 @@
 
                 <form th:action="@{/readers/edit}"
                       th:object="${reader}"
-                      method="post">
+                      method="post"
+                      enctype="multipart/form-data">
 
                     <input type="hidden" th:field="*{id}"/>
 
@@ -86,6 +87,18 @@
                                 </option>
 
                             </select>
+
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <input type="hidden" th:field="*{avatar}">
+
+                            <label class="form-label">Upload New Avatar</label>
+
+                            <input type="file"
+                                   class="form-control"
+                                   name="avatarFile"
+                                   accept="image/*">
 
                         </div>
 
