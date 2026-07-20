@@ -1,7 +1,9 @@
 package com.library.management.controllers;
 
+import com.library.management.entities.Role;
 import com.library.management.entities.User;
 import com.library.management.services.BorrowService;
+import com.library.management.services.RoleService;
 import com.library.management.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -13,6 +15,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 
 @Controller
 @RequestMapping("/readers")
@@ -20,6 +23,7 @@ import java.nio.file.Paths;
 public class ReaderManagementController {
     private final UserService userService;
     private final BorrowService borrowService;
+    private final RoleService roleService;
 
     @GetMapping("")
     public String list(@RequestParam(name = "keyword", required = false) String keyword, Model model) {
@@ -61,13 +65,17 @@ public class ReaderManagementController {
     @GetMapping("/edit/{id}")
     public String edit(@PathVariable Long id, Model model) {
         User user = userService.findById(id);
+        System.out.println("this is date"+user.getDob());
         model.addAttribute("reader", user);
+        model.addAttribute("birth", user.getDob());
         return "readers/edit";
     }
 
     @PostMapping("/edit")
     public String editPost(@ModelAttribute("reader")User user,
-                           @RequestParam("avatarFile") MultipartFile avatarFile) throws IOException {
+                           @RequestParam("avatarFile") MultipartFile avatarFile,
+                           @RequestParam("role_id")long role_id,
+                           @RequestParam(value = "birth", required = false)LocalDate birth) throws IOException {
         if (!avatarFile.isEmpty()) {
 
             // Create uploads folder if it doesn't exist
@@ -86,6 +94,9 @@ public class ReaderManagementController {
             // Save URL into database
             user.setAvatar("/uploads/" + fileName);
         }
+        Role role = roleService.findById(role_id);
+        user.setRole(role);
+        user.setDob(birth);
         userService.update(user);
         return "redirect:/readers";
     }

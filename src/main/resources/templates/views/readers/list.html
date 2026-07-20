@@ -51,8 +51,6 @@
                     <th>Full Name</th>
                     <th>Email</th>
                     <th>Phone</th>
-                    <th>Address</th>
-                    <th>Date of Birth</th>
                     <th>Status</th>
                     <th>Action</th>
                 </tr>
@@ -62,7 +60,7 @@
 
                 <tr th:if="${#lists.isEmpty(readers)}">
                     <td colspan="9" class="text-center text-secondary py-4">
-                        No readers found.
+                        No users found.
                     </td>
                 </tr>
 
@@ -92,9 +90,6 @@
 
                     <td th:text="${reader.phone}"></td>
 
-                    <td th:text="${reader.address}"></td>
-
-                    <td th:text="${reader.dob}"></td>
 
                     <td class="text-center">
 

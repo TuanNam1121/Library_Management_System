@@ -15,7 +15,7 @@
         <div class="card shadow" style="background-color:#252836">
 
             <div class="card-header bg-dark text-white">
-                <h3 class="mb-0">Update Reader</h3>
+                <h3 class="mb-0">Update User</h3>
             </div>
 
             <div class="card-body" style="background-color:#252836">
@@ -65,10 +65,22 @@
                         </div>
 
                         <div class="col-md-6 mb-3">
+
+                            <label class="form-label">Role</label>
+
+                            <select class="form-select" name="role_id">
+                                <option value="3" th:selected="${reader.role.id == 3}">Reader</option>
+                                <option value="2" th:selected="${reader.role.id == 2}">Librarian</option>
+                            </select>
+
+                        </div>
+
+                        <div class="col-md-6 mb-3">
                             <label class="form-label">Date of Birth</label>
                             <input type="date"
                                    class="form-control"
-                                   th:field="*{dob}" readonly>
+                                   name="birth"
+                                   th:value="${birth}">
                         </div>
 
                         <div class="col-md-6 mb-3">
