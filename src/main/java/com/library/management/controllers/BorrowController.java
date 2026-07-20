@@ -172,6 +172,46 @@ public class BorrowController {
         }
     }
 
+    // UC06 - Librarian Confirm Pickup
+    @PostMapping("/{id}/confirm-pickup")
+    public String confirmPickup(@PathVariable Long id, HttpSession session) {
+        String loginUser = (String) session.getAttribute("loggedInUser");
+        String userRole = (String) session.getAttribute("userRole");
+        if (loginUser == null) {
+            return "redirect:/auths/login";
+        }
+        if (!"LIBRARIAN".equals(userRole)) {
+            return "redirect:/books";
+        }
+
+        try {
+            borrowService.confirmPickup(id, loginUser);
+            return "redirect:/borrows/" + id + "?success=pickupConfirmed";
+        } catch (RuntimeException ex) {
+            return "redirect:/borrows/" + id + "?error=" + URLEncoder.encode(ex.getMessage(), StandardCharsets.UTF_8);
+        }
+    }
+
+    // UC06 - Librarian Cancel Reservation
+    @PostMapping("/{id}/cancel")
+    public String cancelReservation(@PathVariable Long id, HttpSession session) {
+        String loginUser = (String) session.getAttribute("loggedInUser");
+        String userRole = (String) session.getAttribute("userRole");
+        if (loginUser == null) {
+            return "redirect:/auths/login";
+        }
+        if (!"LIBRARIAN".equals(userRole)) {
+            return "redirect:/books";
+        }
+
+        try {
+            borrowService.cancelReservation(id, loginUser);
+            return "redirect:/borrows/" + id + "?success=reservationCancelled";
+        } catch (RuntimeException ex) {
+            return "redirect:/borrows/" + id + "?error=" + URLEncoder.encode(ex.getMessage(), StandardCharsets.UTF_8);
+        }
+    }
+
     // UC07 - Librarian Record Return
     @PostMapping("/{id}/return")
     public String recordReturn(@PathVariable Long id, HttpSession session) {

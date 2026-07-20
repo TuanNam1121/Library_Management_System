@@ -58,8 +58,10 @@
         
         <!-- Alerts -->
         <div th:if="${param.success != null and param.success[0] != 'returnedWithFine'}" class="alert alert-success" style="background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: var(--accent-success); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem;">
-            <strong th:if="${param.success[0] == 'approved'}">Yêu cầu mượn sách đã được phê duyệt.</strong>
+            <strong th:if="${param.success[0] == 'approved'}">Yêu cầu mượn sách đã được duyệt và chuyển sang giữ chỗ.</strong>
             <strong th:if="${param.success[0] == 'rejected'}">Yêu cầu mượn sách đã bị từ chối.</strong>
+            <strong th:if="${param.success[0] == 'pickupConfirmed'}">📖 Xác nhận độc giả đã nhận sách thành công. Bắt đầu mượn!</strong>
+            <strong th:if="${param.success[0] == 'reservationCancelled'}">❌ Đã hủy giữ chỗ và hoàn trả số lượng sách về kho.</strong>
             <strong th:if="${param.success[0] == 'returned'}">✅ Đã ghi nhận trả sách thành công (không có phí phạt).</strong>
             <strong th:if="${param.success[0] == 'paid'}">✅ Đã hoàn tất thanh toán tiền phạt quá hạn và nhận lại sách.</strong>
         </div>
@@ -74,6 +76,13 @@
             <strong>Lỗi!</strong> <span th:text="${param.error}">Có lỗi xảy ra.</span>
         </div>
 
+        <!-- Countdown box if RESERVED -->
+        <div th:if="${request.status == T(com.library.management.enums.BorrowStatus).RESERVED}" 
+             class="alert alert-info" 
+             style="background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.3); color: #60a5fa; padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem;">
+            ⏱️ <strong>Thời gian giữ chỗ còn lại:</strong> <span id="countdown" style="font-weight: 700;">Đang tính toán...</span>
+            <p style="margin: 0.4rem 0 0; font-size: 0.9rem; opacity: 0.9;">Độc giả cần đến thư viện nhận sách trong vòng 1 phút kể từ lúc duyệt. Quá thời hạn giữ chỗ, yêu cầu sẽ bị hủy.</p>
+        </div>
 
         <div class="row">
             <!-- LEFT COLUMN: READER & APPROVAL INFO -->
@@ -113,9 +122,13 @@
                                   style="color: var(--accent-warning); background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); padding: 0.2rem 0.5rem; border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 600;">
                                 Chờ duyệt
                             </span>
-                            <span th:if="${request.status == T(com.library.management.enums.BorrowStatus).APPROVED}"
+                            <span th:if="${request.status == T(com.library.management.enums.BorrowStatus).RESERVED}"
+                                  style="color: #a855f7; background: rgba(168,85,247,0.15); border: 1px solid rgba(168,85,247,0.3); padding: 0.2rem 0.5rem; border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 600;">
+                                Đang giữ chỗ
+                            </span>
+                            <span th:if="${request.status == T(com.library.management.enums.BorrowStatus).BORROWING}"
                                   style="color: var(--accent-success); background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); padding: 0.2rem 0.5rem; border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 600;">
-                                Đã duyệt
+                                Đang mượn
                             </span>
                             <span th:if="${request.status == T(com.library.management.enums.BorrowStatus).REJECTED}"
                                   style="color: var(--accent-danger); background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); padding: 0.2rem 0.5rem; border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 600;">
@@ -124,6 +137,10 @@
                             <span th:if="${request.status == T(com.library.management.enums.BorrowStatus).RETURNED}"
                                   style="color: #60a5fa; background: rgba(96,165,250,0.15); border: 1px solid rgba(96,165,250,0.3); padding: 0.2rem 0.5rem; border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 600;">
                                 Đã trả sách
+                            </span>
+                            <span th:if="${request.status == T(com.library.management.enums.BorrowStatus).CANCELLED}"
+                                  style="color: var(--text-secondary); background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); padding: 0.2rem 0.5rem; border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 600;">
+                                Đã hủy giữ chỗ
                             </span>
                         </span>
                     </div>
@@ -187,7 +204,8 @@
                             <span th:if="${detail.status == T(com.library.management.enums.BorrowItemStatus).BORROWING}" style="color: var(--accent-warning);">Đang mượn</span>
                             <span th:if="${detail.status == T(com.library.management.enums.BorrowItemStatus).RETURNED}" style="color: var(--accent-success);">Đã trả</span>
                             <span th:if="${detail.status == T(com.library.management.enums.BorrowItemStatus).OVERDUE}" style="color: var(--accent-danger);">Quá hạn</span>
-                            <span th:if="${detail.status == null}" style="color: var(--text-muted);">Chờ duyệt</span>
+                            <span th:if="${detail.status == null and request.status == T(com.library.management.enums.BorrowStatus).RESERVED}" style="color: #a855f7;">Đang giữ chỗ</span>
+                            <span th:if="${detail.status == null and request.status != T(com.library.management.enums.BorrowStatus).RESERVED}" style="color: var(--text-muted);">Chờ duyệt</span>
                         </span>
                     </div>
 
@@ -248,16 +266,27 @@
                 </form>
             </div>
 
-            <!-- Return & Fine Payment Controls (Only for LIBRARIAN and APPROVED requests) -->
-            <div th:if="${session.userRole == 'LIBRARIAN' and request.status == T(com.library.management.enums.BorrowStatus).APPROVED}"
-                 th:with="detail0=${request.details != null and !request.details.isEmpty() ? request.details[0] : null}">
+            <!-- Reserved / Pickup Controls (Only for LIBRARIAN and RESERVED requests) -->
+            <div th:if="${session.userRole == 'LIBRARIAN' && request.status == T(com.library.management.enums.BorrowStatus).RESERVED}" class="d-flex gap-2">
+                <form th:action="@{/borrows/{id}/confirm-pickup(id=${request.id})}" method="POST" style="display: inline;">
+                    <button type="submit" id="pickup-btn" class="btn btn-success">
+                        📖 Xác nhận đã nhận sách (Bắt đầu mượn)
+                    </button>
+                </form>
+                <form th:action="@{/borrows/{id}/cancel(id=${request.id})}" method="POST" style="display: inline;"
+                      th:with="expired=${request.details[0].reservedAt != null and request.details[0].reservedAt.plusMinutes(1).isBefore(T(java.time.LocalDateTime).now())}">
+                    <button type="submit" id="cancel-reservation-btn" class="btn btn-outline" 
+                            style="color: var(--accent-danger); border-color: var(--accent-danger);"
+                            th:styleappend="${expired} ? '' : 'display: none;'"
+                            onclick="return confirm('Bạn có chắc chắn muốn hủy yêu cầu giữ chỗ này?')">
+                        ❌ Hủy yêu cầu giữ chỗ (Quá hạn)
+                    </button>
+                </form>
+            </div>
 
-                <!--
-                    3 trạng thái con khi APPROVED:
-                    A) returnDate == null          → chưa bấm "Đã trả"            → show nút "Đã trả"
-                    B) returnDate != null + fine chưa TT → đã trả, có phí quá hạn → show card phí + nút TT
-                    C) returnDate != null + không fine/đã TT → không phí / đã TT   → (sẽ tự RETURNED, không cần nút)
-                -->
+            <!-- Return & Fine Payment Controls (Only for LIBRARIAN and BORROWING requests) -->
+            <div th:if="${session.userRole == 'LIBRARIAN' and request.status == T(com.library.management.enums.BorrowStatus).BORROWING}"
+                 th:with="detail0=${request.details != null and !request.details.isEmpty() ? request.details[0] : null}">
 
                 <!-- === CASE A: Chưa trả === -->
                 <div th:if="${detail0 != null and detail0.returnDate == null}">
@@ -317,5 +346,46 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
         crossorigin="anonymous"></script>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    document.addEventListener("DOMContentLoaded", function() {
+        var countdownEl = document.getElementById("countdown");
+        if (countdownEl) {
+            // Get reservedAt from model
+            var reservedAtStr = /*[[${request.details[0].reservedAt}]]*/ '';
+            if (reservedAtStr) {
+                var reservedTime = new Date(reservedAtStr).getTime();
+                var expireTime = reservedTime + 60000; // 1 minute
+
+                function updateCountdown() {
+                    var now = new Date().getTime();
+                    var timeLeft = expireTime - now;
+
+                    if (timeLeft <= 0) {
+                        countdownEl.innerHTML = "<span class='text-danger font-weight-bold'>Đã hết hạn giữ chỗ! Cần hủy yêu cầu này.</span>";
+                        var cancelBtn = document.getElementById("cancel-reservation-btn");
+                        if (cancelBtn) {
+                            cancelBtn.style.display = "inline-block";
+                        }
+                        var pickupBtn = document.getElementById("pickup-btn");
+                        if (pickupBtn) {
+                            pickupBtn.disabled = true;
+                            pickupBtn.title = "Đã quá hạn giữ chỗ, không thể nhận sách!";
+                        }
+                        clearInterval(timerInterval);
+                    } else {
+                        var seconds = Math.floor(timeLeft / 1000);
+                        countdownEl.innerHTML = seconds + " giây";
+                    }
+                }
+
+                updateCountdown();
+                var timerInterval = setInterval(updateCountdown, 1000);
+            }
+        }
+    });
+    /*]]>*/
+</script>
 </body>
 </html>

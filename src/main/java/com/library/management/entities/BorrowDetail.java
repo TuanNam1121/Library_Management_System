@@ -26,6 +26,8 @@ public class BorrowDetail {
     @JoinColumn(name="book_id")
     private Book book;
 
+    private LocalDateTime reservedAt;
+
     private LocalDateTime borrowDate;
 
     private LocalDateTime dueDate;
