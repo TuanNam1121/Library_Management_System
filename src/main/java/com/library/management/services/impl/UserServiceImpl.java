@@ -60,6 +60,10 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByUsername(dto.getUsername())
                 .orElseThrow(() -> new UsernameNotExistException("Tài khoản không tồn tại"));
 
+        if (!user.getEnabled()) {
+            throw new WrongPasswordOrUserNameException("Tài khoản chưa được kích hoạt");
+        }
+
         if (!user.getPassword().equals(dto.getPassword())) {
             throw new WrongPasswordOrUserNameException("Sai tên đăng nhập hoặc mật khẩu");
         }

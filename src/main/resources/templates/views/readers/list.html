@@ -115,11 +115,6 @@
                             View
                         </a>
 
-                        <a th:href="@{/readers/edit/{id}(id=${reader.id})}"
-                           class="btn btn-warning btn-sm">
-                            Edit
-                        </a>
-
                         <a th:if="${reader.enabled}"
                            th:href="@{/readers/deactivate/{id}(id=${reader.id})}"
                            class="btn btn-danger btn-sm"

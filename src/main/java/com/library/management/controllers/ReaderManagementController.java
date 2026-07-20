@@ -7,6 +7,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @Controller
 @RequestMapping("/readers")
@@ -60,7 +66,26 @@ public class ReaderManagementController {
     }
 
     @PostMapping("/edit")
-    public String editPost(@ModelAttribute("reader")User user){
+    public String editPost(@ModelAttribute("reader")User user,
+                           @RequestParam("avatarFile") MultipartFile avatarFile) throws IOException {
+        if (!avatarFile.isEmpty()) {
+
+            // Create uploads folder if it doesn't exist
+            Path uploadDir = Paths.get("uploads");
+            if (!Files.exists(uploadDir)) {
+                Files.createDirectories(uploadDir);
+            }
+
+            // Optional: make filename unique
+            String fileName = System.currentTimeMillis() + "_"
+                    + avatarFile.getOriginalFilename();
+
+            // Save file
+            avatarFile.transferTo(uploadDir.resolve(fileName));
+
+            // Save URL into database
+            user.setAvatar("/uploads/" + fileName);
+        }
         userService.update(user);
         return "redirect:/readers";
     }
