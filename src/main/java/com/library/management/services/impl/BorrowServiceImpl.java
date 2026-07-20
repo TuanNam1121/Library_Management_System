@@ -153,14 +153,6 @@ public class BorrowServiceImpl implements BorrowService {
             throw new RuntimeException("Yêu cầu mượn này không ở trạng thái giữ chỗ để nhận sách");
         }
 
-        // Check if reservation is expired (1 minute limit)
-        if (request.getDetails() != null && !request.getDetails().isEmpty()) {
-            BorrowDetail detail = request.getDetails().get(0);
-            if (detail.getReservedAt() != null && detail.getReservedAt().plusMinutes(1).isBefore(LocalDateTime.now())) {
-                throw new RuntimeException("Hạn giữ chỗ đã quá 1 phút. Không thể nhận sách, vui lòng hủy yêu cầu.");
-            }
-        }
-
         User librarian = userRepository.findByUsername(librarianUsername)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy thủ thư với username: " + librarianUsername));
 
