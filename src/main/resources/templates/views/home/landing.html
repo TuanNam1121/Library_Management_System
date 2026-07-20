@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LibraryHub - Hệ thống quản lý thư viện</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link href="/css/library.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"></script>
+
+    <style>
+        /* Bổ sung nhỏ cho landing page, dùng lại biến màu của library.css */
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 1.75rem 1.5rem;
+            height: 100%;
+            transition: var(--transition);
+        }
+        .feature-card:hover {
+            border-color: var(--glass-border-hover);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+            background: var(--bg-card-hover);
+        }
+        .feature-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: var(--radius-md);
+            background: var(--gradient-card);
+            border: 1px solid rgba(99,102,241,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .feature-card h5 { color: var(--text-primary); font-weight: 700; }
+        .feature-card p { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0; }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .stat-label { color: var(--text-muted); font-size: 0.85rem; }
+
+        .section-title {
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+        }
+        .section-sub { color: var(--text-secondary); }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            color: #fff;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.75rem;
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        .locked-section {
+            position: relative;
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+        }
+        .locked-preview {
+            filter: blur(6px);
+            opacity: 0.45;
+            pointer-events: none;
+            user-select: none;
+            padding: 2rem;
+        }
+        .locked-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            background: rgba(10,14,26,0.35);
+            backdrop-filter: blur(2px);
+            text-align: center;
+            padding: 1.5rem;
+        }
+        .locked-overlay .lock-icon { font-size: 2.5rem; }
+        .locked-overlay h4 { color: var(--text-primary); font-weight: 700; }
+        .locked-overlay p { color: var(--text-secondary); max-width: 420px; }
+
+        .cta-banner {
+            background: var(--gradient-hero);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav class="navbar">
+    <div class="container navbar-inner">
+        <a class="brand" th:href="@{/}">
+            <span class="brand-icon"></span>
+            <span class="brand-text">LibraryHub</span>
+        </a>
+        <div class="nav-links d-none d-md-flex">
+            <a class="nav-link" href="#features">Tính năng</a>
+            <a class="nav-link" href="#how-it-works">Cách hoạt động</a>
+            <a class="nav-link" href="#library">Kho sách</a>
+        </div>
+        <div class="nav-actions">
+            <!-- Chưa đăng nhập -->
+            <th:block th:if="${session.loggedInUser == null}">
+                <a class="btn btn-outline" th:href="@{/auths/login}">Đăng nhập</a>
+                <a class="btn btn-primary" th:href="@{/auths/register}">Đăng ký</a>
+            </th:block>
+            <!-- Đã đăng nhập -->
+            <th:block th:if="${session.loggedInUser != null}">
+                <span class="nav-link" th:text="'Xin chào, ' + ${session.loggedInUser}">Xin chào</span>
+                <a class="btn btn-primary" th:href="@{/books}">Vào thư viện</a>
+                <a class="btn btn-outline" th:href="@{/auths/logout}">Đăng xuất</a>
+            </th:block>
+        </div>
+    </div>
+</nav>
+
+<!-- ===== HERO ===== -->
+<header class="hero-section">
+    <div class="container position-relative">
+        <h1 class="hero-title">
+            Quản lý thư viện cho trường học <span>thông minh</span>,<br class="d-none d-md-block">
+            mượn sách <span>dễ dàng</span>
+        </h1>
+        <p class="hero-subtitle mx-auto" style="max-width: 620px;">
+            LibraryHub giúp bạn tìm kiếm, mượn và gia hạn sách trực tuyến chỉ với vài cú nhấp chuột.
+            Đăng nhập để khám phá toàn bộ kho sách của thư viện.
+        </p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <th:block th:if="${session.loggedInUser == null}">
+                <a class="btn btn-primary btn-lg" th:href="@{/auths/login}"> Đăng nhập để bắt đầu</a>
+                <a class="btn btn-outline btn-lg" th:href="@{/auths/register}">Tạo tài khoản miễn phí</a>
+            </th:block>
+            <th:block th:if="${session.loggedInUser != null}">
+                <a class="btn btn-primary btn-lg" th:href="@{/books}">Khám phá kho sách</a>
+            </th:block>
+        </div>
+
+        <!-- Stats -->
+        <div class="row mt-5 pt-3 justify-content-center text-center">
+            <div class="col-6 col-md-3 mb-3">
+                <div class="stat-value">10.000+</div>
+                <div class="stat-label">Đầu sách</div>
+            </div>
+            <div class="col-6 col-md-3 mb-3">
+                <div class="stat-value">2.500+</div>
+                <div class="stat-label">Bạn đọc</div>
+            </div>
+            <div class="col-6 col-md-3 mb-3">
+                <div class="stat-value">50+</div>
+                <div class="stat-label">Thể loại</div>
+            </div>
+            <div class="col-6 col-md-3 mb-3">
+                <div class="stat-value">24/7</div>
+                <div class="stat-label">Truy cập trực tuyến</div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="page-content">
+
+    <!-- ===== FEATURES ===== -->
+    <section id="features" class="section-wrapper">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">Mọi thứ bạn cần cho việc đọc sách</h2>
+                <p class="section-sub">Một nền tảng duy nhất cho toàn bộ trải nghiệm thư viện</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-3">
+                    <div class="feature-card">
+                        <div class="feature-icon"></div>
+                        <h5>Tìm kiếm thông minh</h5>
+                        <p>Tìm sách theo tên, tác giả, thể loại hoặc ISBN với bộ lọc mạnh mẽ.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="feature-card">
+                        <div class="feature-icon"></div>
+                        <h5>Mượn sách trực tuyến</h5>
+                        <p>Gửi yêu cầu mượn sách online, theo dõi trạng thái phê duyệt theo thời gian thực.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="feature-card">
+                        <div class="feature-icon"></div>
+                        <h5>Gia hạn dễ dàng</h5>
+                        <p>Gia hạn thời gian mượn chỉ với một cú nhấp, không cần đến thư viện.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="feature-card">
+                        <div class="feature-icon"></div>
+                        <h5>Hồ sơ cá nhân</h5>
+                        <p>Quản lý thông tin, lịch sử mượn trả và thông báo trong một nơi duy nhất.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== HOW IT WORKS ===== -->
+    <section id="how-it-works" class="section-wrapper">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">Bắt đầu chỉ với 3 bước</h2>
+                <p class="section-sub">Đơn giản, nhanh chóng và hoàn toàn miễn phí</p>
+            </div>
+            <div class="row g-4 text-center">
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="step-number">1</div>
+                        <h5>Tạo tài khoản</h5>
+                        <p>Đăng ký tài khoản bạn đọc miễn phí chỉ trong chưa đầy một phút.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="step-number">2</div>
+                        <h5>Đăng nhập</h5>
+                        <p>Đăng nhập để mở khóa toàn bộ kho sách và các tính năng của thư viện.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="step-number">3</div>
+                        <h5>Mượn &amp; đọc sách</h5>
+                        <p>Tìm cuốn sách yêu thích, gửi yêu cầu mượn và tận hưởng việc đọc.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== LIBRARY PREVIEW (khóa khi chưa đăng nhập) ===== -->
+    <section id="library" class="section-wrapper">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">Kho sách của thư viện</h2>
+                <p class="section-sub" th:if="${session.loggedInUser == null}">
+                    Đăng nhập để xem toàn bộ nội dung bên trong
+                </p>
+            </div>
+
+            <!-- Chưa đăng nhập: xem trước bị làm mờ + overlay yêu cầu đăng nhập -->
+            <div class="locked-section" th:if="${session.loggedInUser == null}">
+                <div class="locked-preview">
+                    <div class="row g-4">
+                        <div class="col-6 col-md-3" th:each="i : ${#numbers.sequence(1, 4)}">
+                            <div class="book-card">
+                                <div class="book-cover-placeholder"></div>
+                                <div class="book-card-body">
+                                    <div class="book-card-title">Tên sách</div>
+                                    <div class="book-card-author">Tác giả</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="locked-overlay">
+                    <div class="lock-icon"></div>
+                    <h4>Nội dung dành riêng cho thành viên</h4>
+                    <p>Bạn cần đăng nhập để xem kho sách, mượn sách và sử dụng các tính năng bên trong.</p>
+                    <div class="d-flex gap-3 flex-wrap justify-content-center">
+                        <a class="btn btn-primary btn-lg" th:href="@{/auths/login}">Đăng nhập ngay</a>
+                        <a class="btn btn-outline btn-lg" th:href="@{/auths/register}">Đăng ký tài khoản</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Đã đăng nhập: dẫn thẳng vào kho sách -->
+            <div class="cta-banner" th:if="${session.loggedInUser != null}">
+                <h3 class="section-title mb-3">Chào mừng trở lại! </h3>
+                <p class="section-sub mb-4">Kho sách đang chờ bạn khám phá.</p>
+                <a class="btn btn-primary btn-lg" th:href="@{/books}">Xem danh sách sách</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CTA ===== -->
+    <section class="section-wrapper" th:if="${session.loggedInUser == null}">
+        <div class="container">
+            <div class="cta-banner">
+                <h3 class="section-title mb-3">Sẵn sàng bắt đầu hành trình đọc sách?</h3>
+                <p class="section-sub mb-4 mx-auto" style="max-width: 520px;">
+                    Tham gia cùng hàng nghìn bạn đọc đang sử dụng LibraryHub mỗi ngày.
+                </p>
+                <a class="btn btn-primary btn-lg" th:href="@{/auths/register}">Tạo tài khoản miễn phí</a>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+    <div class="container">
+        <p>&copy; 2026 LibraryHub - Hệ thống quản lý thư viện trực tuyến</p>
+    </div>
+</footer>
+
+</body>
+</html>
