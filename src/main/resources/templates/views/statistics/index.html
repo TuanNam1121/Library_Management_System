@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head(title='Báo cáo Thống kê - LibraryHub', description='Xem báo cáo thống kê tình hình mượn trả sách trong thư viện')}"></head>
+<body>
+
+<nav th:replace="~{fragments/common :: navbar}"></nav>
+
+<main class="section-wrapper">
+    <div class="container">
+        
+        <div style="margin-bottom: 2rem;">
+            <h1 style="font-size: 2.25rem; font-weight: 800; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 0.5rem;">Báo cáo Thống kê</h1>
+            <p style="color: var(--text-secondary); font-size: 1rem;">Tổng quan về tình hình mượn trả và doanh số phạt của thư viện</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
+            
+            <div style="background: var(--gradient-card); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: 1.5rem; transition: var(--transition); box-shadow: var(--shadow-card);" 
+                 onmouseover="this.style.borderColor='var(--glass-border-hover)'; this.style.boxShadow='var(--shadow-hover)';" 
+                 onmouseout="this.style.borderColor='var(--glass-border)'; this.style.boxShadow='var(--shadow-card)';">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <span style="font-size: 0.9rem; color: var(--text-secondary); font-weight: 500;">Tổng yêu cầu mượn</span>
+                    <span style="font-size: 1.75rem;">📊</span>
+                </div>
+                <h3 style="font-size: 2rem; font-weight: 700; color: var(--text-primary); margin: 0;" th:text="${totalRequests}">0</h3>
+            </div>
+
+            <div style="background: var(--gradient-card); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: 1.5rem; transition: var(--transition); box-shadow: var(--shadow-card);" 
+                 onmouseover="this.style.borderColor='var(--glass-border-hover)'; this.style.boxShadow='var(--shadow-hover)';" 
+                 onmouseout="this.style.borderColor='var(--glass-border)'; this.style.boxShadow='var(--shadow-card)';">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <span style="font-size: 0.9rem; color: var(--text-secondary); font-weight: 500;">Yêu cầu chờ duyệt</span>
+                    <span style="font-size: 1.75rem;">⏳</span>
+                </div>
+                <h3 style="font-size: 2rem; font-weight: 700; color: var(--accent-warning); margin: 0;" th:text="${pendingRequests}">0</h3>
+            </div>
+
+            <div style="background: var(--gradient-card); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: 1.5rem; transition: var(--transition); box-shadow: var(--shadow-card);" 
+                 onmouseover="this.style.borderColor='var(--glass-border-hover)'; this.style.boxShadow='var(--shadow-hover)';" 
+                 onmouseout="this.style.borderColor='var(--glass-border)'; this.style.boxShadow='var(--shadow-card)';">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <span style="font-size: 0.9rem; color: var(--text-secondary); font-weight: 500;">Sách đang được mượn</span>
+                    <span style="font-size: 1.75rem;">📖</span>
+                </div>
+                <h3 style="font-size: 2rem; font-weight: 700; color: var(--accent-primary); margin: 0;" th:text="${activeBorrows}">0</h3>
+            </div>
+
+            <div style="background: var(--gradient-card); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: 1.5rem; transition: var(--transition); box-shadow: var(--shadow-card);" 
+                 onmouseover="this.style.borderColor='var(--glass-border-hover)'; this.style.boxShadow='var(--shadow-hover)';" 
+                 onmouseout="this.style.borderColor='var(--glass-border)'; this.style.boxShadow='var(--shadow-card)';">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <span style="font-size: 0.9rem; color: var(--text-secondary); font-weight: 500;">Số lượt quá hạn</span>
+                    <span style="font-size: 1.75rem;">⚠️</span>
+                </div>
+                <h3 style="font-size: 2rem; font-weight: 700; color: var(--accent-danger); margin: 0;" th:text="${overdueBorrows}">0</h3>
+            </div>
+
+            <div style="background: var(--gradient-card); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: 1.5rem; transition: var(--transition); box-shadow: var(--shadow-card);" 
+                 onmouseover="this.style.borderColor='var(--glass-border-hover)'; this.style.boxShadow='var(--shadow-hover)';" 
+                 onmouseout="this.style.borderColor='var(--glass-border)'; this.style.boxShadow='var(--shadow-card)';">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <span style="font-size: 0.9rem; color: var(--text-secondary); font-weight: 500;">Tổng tiền phạt</span>
+                    <span style="font-size: 1.75rem;">💰</span>
+                </div>
+                <h3 style="font-size: 2rem; font-weight: 700; color: var(--accent-success); margin: 0;" th:text="${#numbers.formatDecimal(totalFines, 0, 'COMMA', 0, 'POINT') + ' VND'}">0 VND</h3>
+            </div>
+
+        </div>
+
+        <div style="background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-card);">
+            <div style="margin-bottom: 1.5rem;">
+                <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">Top 5 Sách mượn nhiều nhất</h2>
+                <p style="color: var(--text-secondary); font-size: 0.875rem;">Danh sách những đầu sách được độc giả quan tâm và mượn nhiều nhất</p>
+            </div>
+
+            <div class="table-responsive" style="overflow-x: auto;">
+                <table class="table" style="width: 100%; border-collapse: collapse; text-align: left;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid var(--glass-border);">
+                            <th style="padding: 1rem; color: var(--text-secondary); font-weight: 600; width: 80px;">Hạng</th>
+                            <th style="padding: 1rem; color: var(--text-secondary); font-weight: 600;">Tên sách</th>
+                            <th style="padding: 1rem; color: var(--text-secondary); font-weight: 600;">Tác giả</th>
+                            <th style="padding: 1rem; color: var(--text-secondary); font-weight: 600;">Thể loại</th>
+                            <th style="padding: 1rem; color: var(--text-secondary); font-weight: 600; text-align: right; width: 150px;">Số lượt mượn</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="book, iterStat : ${topBooks}" style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: var(--transition);"
+                            onmouseover="this.style.background='rgba(255,255,255,0.02)';"
+                            onmouseout="this.style.background='transparent';">
+                            <td style="padding: 1rem; font-weight: 700; color: var(--accent-primary);" th:text="${iterStat.count}">1</td>
+                            <td style="padding: 1rem; font-weight: 600; color: var(--text-primary);" th:text="${book.title}">Tên sách</td>
+                            <td style="padding: 1rem; color: var(--text-secondary);" th:text="${book.author}">Tác giả</td>
+                            <td style="padding: 1rem; color: var(--text-secondary);" th:text="${book.category}">Thể loại</td>
+                            <td style="padding: 1rem; font-weight: 700; color: var(--accent-success); text-align: right;" th:text="${book.count}">0</td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(topBooks)}">
+                            <td colspan="5" style="padding: 2rem; text-align: center; color: var(--text-muted);">
+                                Chưa có dữ liệu thống kê mượn sách.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<footer th:replace="~{fragments/common :: footer}"></footer>
+
+</body>
+</html>
