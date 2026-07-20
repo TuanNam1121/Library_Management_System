@@ -50,7 +50,7 @@ public class UserServiceImpl implements UserService {
         user.setDob(registerRequest.getDob());
         user.setEnabled(true);
 
-        Role readerRole = roleRepository.findById(1L).orElseThrow(() -> new RuntimeException("Reader role not found "));
+        Role readerRole = roleRepository.findById(3L).orElseThrow(() -> new RuntimeException("Reader role not found "));
         user.setRole(readerRole);
         userRepository.save(user);
     }
