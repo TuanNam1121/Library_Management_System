@@ -14,7 +14,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUsername(String username);
     User findUserByUsernameAndPassword(String Email, String Password);
 
-    @Query("FROM User u WHERE u.role.id = 3")
+    @Query("FROM User u")
     List<User> findAllReader();
 
     @Query("""
@@ -24,9 +24,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
                     OR u.username LIKE CONCAT('%', :keyword, '%')
                     OR u.phone LIKE CONCAT('%', :keyword, '%')
                 )
-                AND u.role.id = 3
             """)
     List<User> searchReader(@Param("keyword") String keyword);
 
-    User findById(long id);
+    @Query("FROM User u WHERE u.id = :id")
+    User findById(@Param("id") long id);
 }
