@@ -5,6 +5,7 @@ import com.library.management.entities.BorrowDetail;
 import com.library.management.entities.BorrowRequest;
 import com.library.management.enums.BorrowStatus;
 import com.library.management.services.BorrowService;
+import com.library.management.services.EmailService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -27,6 +28,7 @@ import java.util.List;
 public class BorrowController {
 
     private final BorrowService borrowService;
+    private final EmailService emailService;
 
     @PostMapping("/request/{bookId}")
     public String submitBorrowRequest(@PathVariable Long bookId, HttpSession session) {
@@ -263,6 +265,28 @@ public class BorrowController {
         try {
             borrowService.payFine(id);
             return "redirect:/borrows/" + id + "?success=paid";
+        } catch (RuntimeException ex) {
+            return "redirect:/borrows/" + id + "?error=" + URLEncoder.encode(ex.getMessage(), StandardCharsets.UTF_8);
+        }
+    }
+
+    @PostMapping("/{id}/send-overdue-email")
+    public String sendOverdueEmail(@PathVariable Long id, HttpSession session) {
+        String loginUser = (String) session.getAttribute("loggedInUser");
+        String userRole = (String) session.getAttribute("userRole");
+        if (loginUser == null) {
+            return "redirect:/auths/login";
+        }
+        if (!"LIBRARIAN".equals(userRole)) {
+            return "redirect:/books";
+        }
+
+        try {
+            BorrowRequest request = borrowService.getRequestById(id);
+            if (request.getDetails() != null && !request.getDetails().isEmpty()) {
+                emailService.sendOverdueReminder(request.getDetails().get(0));
+            }
+            return "redirect:/borrows/" + id + "?success=emailSent";
         } catch (RuntimeException ex) {
             return "redirect:/borrows/" + id + "?error=" + URLEncoder.encode(ex.getMessage(), StandardCharsets.UTF_8);
         }

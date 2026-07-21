@@ -79,6 +79,7 @@
                     phạt).</strong>
                 <strong th:if="${param.success[0] == 'paid'}">✅ Đã hoàn tất thanh toán tiền phạt quá hạn và nhận lại
                     sách.</strong>
+                <strong th:if="${param.success[0] == 'emailSent'}">📧 Đã gửi email nhắc nhở trả sách quá hạn đến độc giả thành công!</strong>
             </div>
             <!-- Alert riêng khi trả sách nhưng có phí phạt cần nộp -->
             <div th:if="${param.success != null and param.success[0] == 'returnedWithFine'}" class="alert"
@@ -358,12 +359,22 @@
                     th:with="detail0=${request.details != null and !request.details.isEmpty() ? request.details[0] : null}">
 
                     <!-- === CASE A: Chưa trả === -->
-                    <div th:if="${detail0 != null and detail0.returnDate == null}">
+                    <div th:if="${detail0 != null and detail0.returnDate == null}" class="d-flex gap-2 align-items-center">
                         <form th:action="@{/borrows/{id}/return(id=${request.id})}" method="POST"
                             style="display:inline;">
                             <button type="submit" class="btn btn-primary"
                                 onclick="return confirm('Xác nhận độc giả đã trả sách?')">
                                 ↩️ Đã trả
+                            </button>
+                        </form>
+                        <!-- Email reminder button (only when overdue) -->
+                        <form th:if="${detail0.dueDate != null and detail0.dueDate.isBefore(T(java.time.LocalDateTime).now())}"
+                              th:action="@{/borrows/{id}/send-overdue-email(id=${request.id})}" method="POST"
+                              style="display:inline;">
+                            <button type="submit" class="btn btn-outline"
+                                    style="color: #f59e0b; border-color: rgba(245,158,11,0.4);"
+                                    onclick="return confirm('Gửi email nhắc nhở trả sách quá hạn cho độc giả?')">
+                                📧 Gửi email nhắc nhở
                             </button>
                         </form>
                     </div>

@@ -24,7 +24,7 @@
 <!-- ===== MAIN CONTENT ===== -->
 <main class="page-content">
     <div class="container py-4">
-        
+
         <!-- Requests List Table -->
         <div class="search-form-wrapper" style="max-width: 1100px; margin: 0 auto; padding: 2rem;">
             <form th:action="@{/borrows/management}" method="get" class="row g-3 align-items-end mb-4">
@@ -124,9 +124,20 @@
                                 </span>
                             </td>
                             <td class="text-center" style="border: none;">
-                                <a th:href="@{/borrows/{id}(id=${req.id})}" class="btn btn-outline btn-sm">
-                                    🔍 Chi tiết
-                                </a>
+                                <div class="d-flex flex-column align-items-center gap-1">
+                                    <a th:href="@{/borrows/{id}(id=${req.id})}" class="btn btn-outline btn-sm">
+                                        🔍 Chi tiết
+                                    </a>
+                                    <!-- Email button only for overdue items -->
+                                    <form th:if="${req.status == T(com.library.management.enums.BorrowStatus).BORROWING and req.details != null and !req.details.isEmpty() and req.details[0].dueDate != null and req.details[0].dueDate.isBefore(T(java.time.LocalDateTime).now())}"
+                                          th:action="@{/borrows/{id}/send-overdue-email(id=${req.id})}" method="POST" style="display:inline;">
+                                        <button type="submit" class="btn btn-outline btn-sm"
+                                                style="color: #f59e0b; border-color: rgba(245,158,11,0.4); font-size: 0.75rem; padding: 0.2rem 0.5rem;"
+                                                onclick="return confirm('Gửi email nhắc nhở trả sách cho đơn này?')">
+                                            📧 Email
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                         <!-- Empty State -->
