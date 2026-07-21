@@ -16,11 +16,11 @@
             <div class="container">
 
                 <!-- Alerts for Borrow Request status -->
-                <div th:if="${param.borrowSuccess}" class="alert" style="background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: var(--accent-success); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem;">
+                <div th:if="${borrowSuccess}" class="alert" style="background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: var(--accent-success); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem;">
                     <strong>Thành công!</strong> Đã gửi yêu cầu mượn sách. Vui lòng chờ thủ thư phê duyệt.
                 </div>
-                <div th:if="${param.borrowError}" class="alert" style="background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: var(--accent-danger); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem;">
-                    <strong>Lỗi!</strong> <span th:text="${param.borrowError}">Có lỗi xảy ra khi gửi yêu cầu mượn.</span>
+                <div th:if="${borrowError}" class="alert" style="background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: var(--accent-danger); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem;">
+                    <strong>Lỗi!</strong> <span th:text="${borrowError}">Có lỗi xảy ra khi gửi yêu cầu mượn.</span>
                 </div>
 
                 <!-- Breadcrumb -->
@@ -119,7 +119,6 @@
                                 </div>
                             </div>
 
-                            <!-- Borrow request button (UC04) -->
                             <div>
                                 <div th:if="${session.loggedInUser != null}">
                                     <form th:if="${session.userRole == 'READER'}" th:action="@{/borrows/request/{bookId}(bookId=${book.id})}" method="POST" style="display: inline;">

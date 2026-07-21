@@ -1076,3 +1076,13 @@ body {
     border-color: var(--glass-border) !important;
 }
 
+select.form-input {
+    background-color: #1e2138 !important;
+    color: #ffffff !important;
+    color-scheme: dark;
+}
+
+select.form-input option {
+    background-color: #1e2138 !important;
+    color: #ffffff !important;
+}

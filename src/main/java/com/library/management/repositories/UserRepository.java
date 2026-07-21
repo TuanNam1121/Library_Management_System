@@ -29,4 +29,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("FROM User u WHERE u.id = :id")
     User findById(@Param("id") long id);
+
+    @Query("""
+            SELECT u FROM User u
+                WHERE (
+                    u.email = :keyword
+                    OR u.phone = :keyword
+                )
+            """)
+    User searchUser(@Param("keyword") String keyword);
 }

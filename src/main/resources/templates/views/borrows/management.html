@@ -37,7 +37,7 @@
 
                 <div class="col-lg-3 col-md-6">
                     <label for="status" class="form-label">Trạng thái mượn</label>
-                    <select id="status" name="status" class="form-input">
+                    <select id="status" name="status"  class="form-input borrow-status-select">
                         <option value="">Tất cả trạng thái</option>
                         <option value="PENDING" th:selected="${selectedStatus == T(com.library.management.enums.BorrowStatus).PENDING}">Chờ duyệt</option>
                         <option value="RESERVED" th:selected="${selectedStatus == T(com.library.management.enums.BorrowStatus).RESERVED}">Đang giữ chỗ</option>
