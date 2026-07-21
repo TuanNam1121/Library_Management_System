@@ -1,104 +1,182 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-
-<head
-    th:replace="~{fragments/common :: head(title='Chỉnh sửa sách - LibraryHub', description='Chỉnh sửa thông tin sách')}">
-</head>
-
+<head th:replace="~{fragments/common :: head(title='Chỉnh sửa sách - LibraryHub', description='Chỉnh sửa thông tin sách')}"></head>
 <body>
-    <nav th:replace="~{fragments/common :: navbar}"></nav>
+<nav th:replace="~{fragments/common :: navbar}"></nav>
 
-    <main class="page-content">
-        <div class="container" style="max-width:720px; padding-top:2rem; padding-bottom:3rem;">
+<style>
+    .form-card {
+        background: var(--bg-card);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-lg);
+        padding: 2.5rem;
+        box-shadow: var(--shadow-card);
+        backdrop-filter: blur(10px);
+        margin-top: 1.5rem;
+    }
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    .form-label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+    }
+    .form-input, .form-select, .form-textarea {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-md);
+        color: var(--text-primary);
+        font-family: inherit;
+        font-size: 0.95rem;
+        transition: var(--transition);
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+        outline: none;
+        border-color: var(--accent-primary);
+        background: rgba(255, 255, 255, 0.06);
+        box-shadow: var(--shadow-glow);
+    }
+    .form-select option {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+    }
+    .btn-submit {
+        padding: 0.75rem 1.5rem;
+        background: var(--gradient-primary);
+        color: white;
+        border: none;
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        box-shadow: var(--shadow-card);
+    }
+    .btn-submit:hover {
+        box-shadow: var(--shadow-hover);
+        transform: translateY(-1px);
+    }
+    .btn-cancel {
+        padding: 0.75rem 1.5rem;
+        background: transparent;
+        color: var(--text-secondary);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-md);
+        text-decoration: none;
+        font-weight: 600;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .btn-cancel:hover {
+        color: var(--text-primary);
+        background: var(--bg-card-hover);
+    }
+    .btn-delete {
+        padding: 0.75rem 1.5rem;
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--accent-danger);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+    .btn-delete:hover {
+        background: rgba(239, 68, 68, 0.2);
+        border-color: var(--accent-danger);
+    }
+</style>
 
-            <h1 style="font-size:1.6rem; font-weight:700; margin-bottom:1.5rem;">Chỉnh sửa sách</h1>
+<main class="page-content">
+    <div class="container" style="max-width:720px; padding-top:2rem; padding-bottom:3rem;">
+
+        <div class="form-card">
+            <h1 style="font-size: 1.8rem; font-weight: 800; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 1.5rem;">Chỉnh sửa sách</h1>
 
             <div th:if="${errorMessage}"
-                style="background:rgba(239,68,68,0.1);border:1px solid #ef4444;color:#ef4444;padding:.75rem 1rem;border-radius:8px;margin-bottom:1rem;"
-                th:text="${errorMessage}"></div>
+                 style="background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);color:#ef4444;padding:1rem 1.25rem;border-radius:var(--radius-md);margin-bottom:1.5rem;"
+                 th:text="${errorMessage}"></div>
 
-            <form th:action="@{/books/{id}/edit(id=${book.id})}" th:object="${form}" method="post"
-                enctype="multipart/form-data">
+            <form th:action="@{/books/{id}/edit(id=${book.id})}" th:object="${form}" method="post" enctype="multipart/form-data">
 
-                <div style="margin-bottom:1rem;">
-                    <label>Tên sách *</label><br>
-                    <input type="text" th:field="*{title}" style="width:100%;padding:.5rem;" required />
+                <div class="form-group">
+                    <label class="form-label">Tên sách *</label>
+                    <input type="text" th:field="*{title}" class="form-input" required/>
                 </div>
 
-                <div style="margin-bottom:1rem;">
-                    <label>ISBN</label><br>
-                    <input type="text" th:field="*{isbn}" style="width:100%;padding:.5rem;" />
+                <div class="form-group">
+                    <label class="form-label">ISBN</label>
+                    <input type="text" th:field="*{isbn}" class="form-input"/>
                 </div>
 
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem;">
                     <div>
-                        <label>Tác giả</label><br>
-                        <select th:field="*{authorId}" style="width:100%;padding:.5rem;">
+                        <label class="form-label">Tác giả</label>
+                        <select th:field="*{authorId}" class="form-select">
                             <option value="0">-- Chọn tác giả --</option>
                             <option th:each="a : ${authors}" th:value="${a.id}" th:text="${a.name}"></option>
                         </select>
                     </div>
                     <div>
-                        <label>Thể loại</label><br>
-                        <select th:field="*{categoryId}" style="width:100%;padding:.5rem;">
+                        <label class="form-label">Thể loại</label>
+                        <select th:field="*{categoryId}" class="form-select">
                             <option value="0">-- Chọn thể loại --</option>
                             <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"></option>
                         </select>
                     </div>
                 </div>
 
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem;">
                     <div>
-                        <label>Tổng số bản *</label><br>
-                        <input type="number" th:field="*{quantity}" min="0" style="width:100%;padding:.5rem;"
-                            required />
+                        <label class="form-label">Tổng số bản *</label>
+                        <input type="number" th:field="*{quantity}" min="0" class="form-input" required/>
                     </div>
                     <div>
-                        <label>Số bản có thể mượn *</label><br>
-                        <input type="number" th:field="*{availableQuantity}" min="0" style="width:100%;padding:.5rem;"
-                            required />
+                        <label class="form-label">Số bản có thể mượn *</label>
+                        <input type="number" th:field="*{availableQuantity}" min="0" class="form-input" required/>
                     </div>
                 </div>
 
-                <div style="margin-bottom:1rem;">
-                    <label>Mô tả</label><br>
-                    <textarea th:field="*{description}" rows="4" style="width:100%;padding:.5rem;"></textarea>
+                <div class="form-group">
+                    <label class="form-label">Mô tả</label>
+                    <textarea th:field="*{description}" rows="4" class="form-textarea"></textarea>
                 </div>
 
-                <div style="margin-bottom:1.5rem;">
-                    <label>Ảnh bìa</label><br>
+                <div class="form-group" style="margin-bottom: 2rem;">
+                    <label class="form-label">Ảnh bìa</label>
                     <img th:if="${book.coverImage != null and !#strings.isEmpty(book.coverImage)}"
-                        th:src="@{${book.coverImage}}" alt="Ảnh bìa hiện tại"
-                        style="height:100px;display:block;margin-bottom:.5rem;border-radius:4px;" /><br>
-                    <input type="file" name="coverImageFile" accept="image/*" />
+                         th:src="@{${book.coverImage}}" alt="Ảnh bìa hiện tại"
+                         style="height: 120px; display: block; margin-bottom: 1rem; border-radius: var(--radius-md); border: 1px solid var(--glass-border); object-fit: cover;" />
+                    <input type="file" name="coverImageFile" accept="image/*" class="form-input" style="padding: 0.5rem;"/>
                 </div>
 
-                <div style="display:flex;gap:.75rem;">
-                    <a th:href="@{/books/{id}(id=${book.id})}"
-                        style="padding:.5rem 1.25rem;border:1px solid #ccc;border-radius:6px;text-decoration:none;">Hủy</a>
-                    <button type="submit"
-                        style="padding:.5rem 1.25rem;background:#6366f1;color:white;border:none;border-radius:6px;cursor:pointer;">Lưu
-                        thay đổi</button>
+                <div style="display:flex;gap:1rem;">
+                    <a th:href="@{/books/{id}(id=${book.id})}" class="btn-cancel">Hủy</a>
+                    <button type="submit" class="btn-submit">Lưu thay đổi</button>
                 </div>
 
             </form>
 
-            <hr style="margin:2rem 0; border-color:rgba(239,68,68,0.3);" />
+            <hr style="margin: 2.5rem 0; border: 0; border-top: 1px solid var(--glass-border);" />
 
             <div>
-                <p style="font-size:.875rem;color:#9ca3af;margin-bottom:.75rem;">Xóa sách này </p>
-                <form th:action="@{/books/{id}/delete(id=${book.id})}" method="post"
-                    onsubmit="return confirm('Bạn có chắc muốn xóa sách này?')">
-                    <button type="submit"
-                        style="padding:.5rem 1.25rem;background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid #ef4444;border-radius:6px;cursor:pointer;">Xóa
-                        sách</button>
+                <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--accent-danger); margin-bottom: 0.5rem;">Vùng nguy hiểm</h3>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">Hành động này sẽ xóa sách khỏi danh mục hiển thị của độc giả.</p>
+                <form th:action="@{/books/{id}/delete(id=${book.id})}" method="post" onsubmit="return confirm('Bạn có chắc muốn xóa sách này?')">
+                    <button type="submit" class="btn-delete">Xóa sách</button>
                 </form>
             </div>
 
         </div>
-    </main>
+    </div>
+</main>
 
-    <footer th:replace="~{fragments/common :: footer}"></footer>
+<footer th:replace="~{fragments/common :: footer}"></footer>
 </body>
-
 </html>
