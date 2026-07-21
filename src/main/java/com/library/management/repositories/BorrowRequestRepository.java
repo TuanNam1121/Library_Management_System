@@ -18,6 +18,28 @@ public interface BorrowRequestRepository extends JpaRepository<BorrowRequest, Lo
     List<BorrowRequest> findAllByOrderByRequestDateDesc();
 
     @Query("""
+        SELECT DISTINCT br
+        FROM BorrowRequest br
+        LEFT JOIN br.details bd
+        LEFT JOIN bd.book b
+        WHERE (:status IS NULL OR br.status = :status)
+          AND (
+              :keyword = ''
+              OR br.id = :requestId
+              OR LOWER(br.reader.fullName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+              OR LOWER(br.reader.username) LIKE LOWER(CONCAT('%', :keyword, '%'))
+              OR LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
+              OR LOWER(b.isbn) LIKE LOWER(CONCAT('%', :keyword, '%'))
+          )
+        ORDER BY br.requestDate DESC
+    """)
+    List<BorrowRequest> searchManagementRequests(
+            @Param("keyword") String keyword,
+            @Param("requestId") Long requestId,
+            @Param("status") BorrowStatus status
+    );
+
+    @Query("""
         SELECT COUNT(br) > 0 
         FROM BorrowRequest br JOIN br.details bd 
         WHERE br.reader.username = :username 

@@ -103,6 +103,28 @@ public class BorrowServiceImpl implements BorrowService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<BorrowRequest> searchRequests(String keyword, BorrowStatus status) {
+        String normalizedKeyword = keyword == null ? "" : keyword.trim();
+        String numericKeyword = normalizedKeyword.startsWith("#")
+                ? normalizedKeyword.substring(1).trim()
+                : normalizedKeyword;
+
+        Long requestId = -1L;
+        try {
+            requestId = Long.valueOf(numericKeyword);
+        } catch (NumberFormatException ignored) {
+            // A non-numeric keyword is matched against reader and book fields.
+        }
+
+        return borrowRequestRepository.searchManagementRequests(
+                normalizedKeyword,
+                requestId,
+                status
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public BorrowRequest getRequestById(Long id) {
         return borrowRequestRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy yêu cầu mượn với id: " + id));

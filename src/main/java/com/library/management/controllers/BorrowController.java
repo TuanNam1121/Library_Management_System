@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -95,7 +96,12 @@ public class BorrowController {
     }
 
     @GetMapping("/management")
-    public String viewAllRequests(HttpSession session, Model model) {
+    public String viewAllRequests(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) BorrowStatus status,
+            HttpSession session,
+            Model model
+    ) {
         String loginUser = (String) session.getAttribute("loggedInUser");
         String userRole = (String) session.getAttribute("userRole");
         if (loginUser == null) {
@@ -105,8 +111,10 @@ public class BorrowController {
             return "redirect:/books";
         }
 
-        List<BorrowRequest> requests = borrowService.getAllRequests();
+        List<BorrowRequest> requests = borrowService.searchRequests(keyword, status);
         model.addAttribute("requests", requests);
+        model.addAttribute("keyword", keyword == null ? "" : keyword.trim());
+        model.addAttribute("selectedStatus", status);
         return "borrows/management";
     }
 

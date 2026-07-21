@@ -27,6 +27,33 @@
         
         <!-- Requests List Table -->
         <div class="search-form-wrapper" style="max-width: 1100px; margin: 0 auto; padding: 2rem;">
+            <form th:action="@{/borrows/management}" method="get" class="row g-3 align-items-end mb-4">
+                <div class="col-lg-6 col-md-12">
+                    <label for="keyword" class="form-label">Tìm kiếm</label>
+                    <input id="keyword" name="keyword" type="text" class="form-input"
+                           th:value="${keyword}"
+                           placeholder="Mã yêu cầu, độc giả, username, tên sách hoặc ISBN">
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <label for="status" class="form-label">Trạng thái mượn</label>
+                    <select id="status" name="status" class="form-input">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="PENDING" th:selected="${selectedStatus == T(com.library.management.enums.BorrowStatus).PENDING}">Chờ duyệt</option>
+                        <option value="RESERVED" th:selected="${selectedStatus == T(com.library.management.enums.BorrowStatus).RESERVED}">Đang giữ chỗ</option>
+                        <option value="BORROWING" th:selected="${selectedStatus == T(com.library.management.enums.BorrowStatus).BORROWING}">Đang mượn</option>
+                        <option value="RETURNED" th:selected="${selectedStatus == T(com.library.management.enums.BorrowStatus).RETURNED}">Đã trả</option>
+                        <option value="REJECTED" th:selected="${selectedStatus == T(com.library.management.enums.BorrowStatus).REJECTED}">Đã từ chối</option>
+                        <option value="CANCELLED" th:selected="${selectedStatus == T(com.library.management.enums.BorrowStatus).CANCELLED}">Đã hủy</option>
+                    </select>
+                </div>
+
+                <div class="col-lg-3 col-md-6 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-fill justify-content-center">Tìm kiếm</button>
+                    <a th:href="@{/borrows/management}" class="btn btn-outline flex-fill justify-content-center">Xóa lọc</a>
+                </div>
+            </form>
+
             <div class="table-responsive">
                 <table class="table mb-0" style="color: var(--text-primary); border-color: var(--glass-border);">
                     <thead>
@@ -104,10 +131,10 @@
                         </tr>
                         <!-- Empty State -->
                         <tr th:if="${#lists.isEmpty(requests)}">
-                            <td colspan="6" class="text-center py-5" style="border: none;">
+                            <td colspan="7" class="text-center py-5" style="border: none;">
                                 <div class="empty-state" style="padding: 2rem 1rem;">
                                     <div class="empty-state-icon" style="font-size: 2.5rem;">📋</div>
-                                    <h3 style="margin-top: 1rem;">Chưa có yêu cầu mượn sách nào trong hệ thống</h3>
+                                    <h3 style="margin-top: 1rem;">Không tìm thấy yêu cầu mượn phù hợp</h3>
                                 </div>
                             </td>
                         </tr>
