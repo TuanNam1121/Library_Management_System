@@ -1,6 +1,9 @@
 package com.library.management.repositories;
 
 import com.library.management.entities.BorrowDetail;
+import com.library.management.enums.BorrowItemStatus;
+
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -28,10 +31,10 @@ public interface BorrowDetailRepository extends JpaRepository<BorrowDetail, Long
     List<BorrowDetail> findByBorrowRequestReaderUsernameAndReturnDateIsNullAndDueDateBeforeOrderByDueDateAsc(
             String username, LocalDateTime dateTime);
 
-    long countByStatus(com.library.management.enums.BorrowItemStatus status);
+    long countByStatus(BorrowItemStatus status);
 
-    long countByStatusAndDueDateBefore(com.library.management.enums.BorrowItemStatus status, LocalDateTime dateTime);
+    long countByStatusAndDueDateBefore(BorrowItemStatus status, LocalDateTime dateTime);
 
     @Query("SELECT bd.book.id, COUNT(bd) FROM BorrowDetail bd GROUP BY bd.book.id ORDER BY COUNT(bd) DESC")
-    List<Object[]> findTopBookIds(org.springframework.data.domain.Pageable pageable);
+    List<Object[]> findTopBookIds(Pageable pageable);
 }
