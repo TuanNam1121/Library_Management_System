@@ -19,6 +19,8 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     List<Book> findAllByIsDeletedFalse();
 
+    List<Book> findAllByCategoryIdAndIsDeletedFalse(Long categoryId);
+
     Optional<Book> findByIdAndIsDeletedFalseAndStatus(Long id, BookStatus status);
 
     @Query("""
