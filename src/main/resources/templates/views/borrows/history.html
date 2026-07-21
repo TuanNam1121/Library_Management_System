@@ -66,7 +66,9 @@
                                     Đang giữ chỗ
                                 </span>
                                 <span th:if="${req.status == T(com.library.management.enums.BorrowStatus).BORROWING}"
-                                      style="color: var(--accent-success); background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600;">
+                                      th:with="isOverdue=${req.details != null and !req.details.isEmpty() and req.details[0].dueDate != null and req.details[0].dueDate.isBefore(T(java.time.LocalDateTime).now())}"
+                                      th:style="${isOverdue} ? 'color: var(--accent-danger); background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600;' : 'color: var(--accent-success); background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600;'"
+                                      th:text="${isOverdue} ? 'Quá hạn' : 'Đang mượn'">
                                     Đang mượn
                                 </span>
                                 <span th:if="${req.status == T(com.library.management.enums.BorrowStatus).REJECTED}"

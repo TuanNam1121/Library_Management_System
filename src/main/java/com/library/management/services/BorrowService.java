@@ -2,6 +2,7 @@ package com.library.management.services;
 
 import com.library.management.entities.BorrowDetail;
 import com.library.management.entities.BorrowRequest;
+import com.library.management.enums.BorrowStatus;
 
 import java.util.List;
 
@@ -11,6 +12,7 @@ public interface BorrowService {
     List<BorrowDetail> getOverdueBooks(String username);
     List<BorrowRequest> getPendingRequests();
     List<BorrowRequest> getAllRequests();
+    List<BorrowRequest> searchRequests(String keyword, BorrowStatus status);
     BorrowRequest getRequestById(Long id);
     void approveRequest(Long requestId, String librarianUsername);
     void rejectRequest(Long requestId, String librarianUsername);

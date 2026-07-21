@@ -141,7 +141,7 @@ public class BookServiceImpl implements BookService {
 
     private void applyCategory(Book book, Long categoryId) {
         if (categoryId != null && categoryId > 0) {
-            Category category = categoryRepository.findById(categoryId).orElse(null);
+            Category category = categoryRepository.findByIdAndIsDeletedFalse(categoryId).orElse(null);
             book.setCategory(category);
         } else {
             book.setCategory(null);

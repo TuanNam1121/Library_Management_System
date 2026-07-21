@@ -19,6 +19,8 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     List<Book> findAllByIsDeletedFalse();
 
+    List<Book> findAllByCategoryIdAndIsDeletedFalse(Long categoryId);
+
     Optional<Book> findByIdAndIsDeletedFalseAndStatus(Long id, BookStatus status);
 
     @Query("""
@@ -29,10 +31,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
               AND (:authorId IS NULL OR b.author.id = :authorId)
               AND (:categoryId IS NULL OR b.category.id = :categoryId)
             """)
-    Page<Book> searchBooks(
-            @Param("keyword") String keyword,
-            @Param("authorId") Long authorId,
-            @Param("categoryId") Long categoryId,
+    Page<Book> searchBooks(@Param("keyword") String keyword, @Param("authorId") Long authorId, @Param("categoryId") Long categoryId,
             Pageable pageable
     );
 

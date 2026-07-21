@@ -66,30 +66,30 @@
         <div class="container py-4" style="max-width: 1100px;">
 
             <!-- Alerts -->
-            <div th:if="${param.success != null and param.success[0] != 'returnedWithFine'}" class="alert alert-success"
+            <div th:if="${borrowSuccess != null and borrowSuccess != 'returnedWithFine'}" class="alert alert-success"
                 style="background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: var(--accent-success); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem;">
-                <strong th:if="${param.success[0] == 'approved'}">Yêu cầu mượn sách đã được duyệt và chuyển sang giữ
+                <strong th:if="${borrowSuccess == 'approved'}">Yêu cầu mượn sách đã được duyệt và chuyển sang giữ
                     chỗ.</strong>
-                <strong th:if="${param.success[0] == 'rejected'}">Yêu cầu mượn sách đã bị từ chối.</strong>
-                <strong th:if="${param.success[0] == 'pickupConfirmed'}">📖 Xác nhận độc giả đã nhận sách thành công.
+                <strong th:if="${borrowSuccess == 'rejected'}">Yêu cầu mượn sách đã bị từ chối.</strong>
+                <strong th:if="${borrowSuccess == 'pickupConfirmed'}">📖 Xác nhận độc giả đã nhận sách thành công.
                     Bắt đầu mượn!</strong>
-                <strong th:if="${param.success[0] == 'reservationCancelled'}">❌ Đã hủy giữ chỗ và hoàn trả số lượng sách
+                <strong th:if="${borrowSuccess == 'reservationCancelled'}">❌ Đã hủy giữ chỗ và hoàn trả số lượng sách
                     về kho.</strong>
-                <strong th:if="${param.success[0] == 'returned'}">✅ Đã ghi nhận trả sách thành công (không có phí
+                <strong th:if="${borrowSuccess == 'returned'}">✅ Đã ghi nhận trả sách thành công (không có phí
                     phạt).</strong>
-                <strong th:if="${param.success[0] == 'paid'}">✅ Đã hoàn tất thanh toán tiền phạt quá hạn và nhận lại
+                <strong th:if="${borrowSuccess == 'paid'}">✅ Đã hoàn tất thanh toán tiền phạt quá hạn và nhận lại
                     sách.</strong>
             </div>
             <!-- Alert riêng khi trả sách nhưng có phí phạt cần nộp -->
-            <div th:if="${param.success != null and param.success[0] == 'returnedWithFine'}" class="alert"
+            <div th:if="${borrowSuccess != null and borrowSuccess == 'returnedWithFine'}" class="alert"
                 style="background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.4); color: var(--accent-warning); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem;">
                 <strong>⚠️ Đã ghi nhận trả sách — Còn phí phạt quá hạn cần thanh toán!</strong>
                 <p style="margin: 0.4rem 0 0; font-size: 0.9rem; opacity: 0.9;">Vui lòng xem thông tin phí phạt bên dưới
                     và xác nhận thanh toán để hoàn tất việc trả sách.</p>
             </div>
-            <div th:if="${param.error}" class="alert alert-danger"
+            <div th:if="${borrowError}" class="alert alert-danger"
                 style="background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: var(--accent-danger); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem;">
-                <strong>Lỗi!</strong> <span th:text="${param.error}">Có lỗi xảy ra.</span>
+                <strong>Lỗi!</strong> <span th:text="${borrowError}">Có lỗi xảy ra.</span>
             </div>
 
             <!-- Countdown box if RESERVED -->

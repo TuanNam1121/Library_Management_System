@@ -1,12 +1,11 @@
 package com.library.management.services.impl;
 
-import com.library.management.entities.Book;
-import com.library.management.entities.BorrowDetail;
-import com.library.management.entities.BorrowRequest;
-import com.library.management.entities.User;
+import com.library.management.entities.*;
 import com.library.management.enums.BookStatus;
 import com.library.management.enums.BorrowItemStatus;
 import com.library.management.enums.BorrowStatus;
+import com.library.management.exception.BorrowOperationException;
+import com.library.management.exception.BorrowSubmitException;
 import com.library.management.repositories.BookRepository;
 import com.library.management.repositories.BorrowDetailRepository;
 import com.library.management.repositories.BorrowRequestRepository;
@@ -17,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -36,27 +36,27 @@ public class BorrowServiceImpl implements BorrowService {
     @Override
     public BorrowRequest createBorrowRequest(String username, Long bookId) {
         User reader = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy độc giả với username: " + username));
+                .orElseThrow(() -> new BorrowSubmitException(bookId, "Không tìm thấy độc giả với username: " + username));
 
         Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy sách với id: " + bookId));
+                .orElseThrow(() -> new BorrowSubmitException(bookId, "Không tìm thấy sách với id: " + bookId));
 
         if (book.getIsDeleted() != null && book.getIsDeleted()) {
-            throw new RuntimeException("Sách này đã bị xóa khỏi hệ thống");
+            throw new BorrowSubmitException(bookId, "Sách này đã bị xóa khỏi hệ thống");
         }
 
         if (book.getStatus() != BookStatus.APPROVED) {
-            throw new RuntimeException("Sách này hiện chưa được phê duyệt để mượn");
+            throw new BorrowSubmitException(bookId, "Sách này hiện chưa được phê duyệt để mượn");
         }
 
         if (book.getAvailableQuantity() == null || book.getAvailableQuantity() <= 0) {
-            throw new RuntimeException("Sách hiện tại không có sẵn bản nào để mượn");
+            throw new BorrowSubmitException(bookId, "Sách hiện tại không có sẵn bản nào để mượn");
         }
 
         List<BorrowStatus> activeStatuses = List.of(BorrowStatus.PENDING, BorrowStatus.RESERVED,
                 BorrowStatus.BORROWING);
         if (borrowRequestRepository.existsActiveBorrowRequest(username, bookId, activeStatuses)) {
-            throw new RuntimeException("Bạn đã gửi yêu cầu mượn hoặc đang giữ chỗ/mượn cuốn sách này rồi.");
+            throw new BorrowSubmitException(bookId, "Bạn đã gửi yêu cầu mượn hoặc đang giữ chỗ/mượn cuốn sách này rồi.");
         }
 
         BorrowRequest request = new BorrowRequest();
@@ -68,7 +68,6 @@ public class BorrowServiceImpl implements BorrowService {
         BorrowDetail detail = new BorrowDetail();
         detail.setBorrowRequest(request);
         detail.setBook(book);
-        // Date and detail status will be populated upon approval
 
         List<BorrowDetail> details = new ArrayList<>();
         details.add(detail);
@@ -78,13 +77,11 @@ public class BorrowServiceImpl implements BorrowService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<BorrowRequest> getBorrowHistory(String username) {
         return borrowRequestRepository.findAllByReaderUsernameOrderByRequestDateDesc(username);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<BorrowDetail> getOverdueBooks(String username) {
         return borrowDetailRepository
                 .findByBorrowRequestReaderUsernameAndReturnDateIsNullAndDueDateBeforeOrderByDueDateAsc(
@@ -92,48 +89,67 @@ public class BorrowServiceImpl implements BorrowService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<BorrowRequest> getPendingRequests() {
         return borrowRequestRepository.findAllByStatusOrderByRequestDateDesc(BorrowStatus.PENDING);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<BorrowRequest> getAllRequests() {
         return borrowRequestRepository.findAllByOrderByRequestDateDesc();
     }
 
     @Override
     @Transactional(readOnly = true)
+    public List<BorrowRequest> searchRequests(String keyword, BorrowStatus status) {
+        String normalizedKeyword = keyword == null ? "" : keyword.trim();
+        String numericKeyword = normalizedKeyword.startsWith("#")
+                ? normalizedKeyword.substring(1).trim()
+                : normalizedKeyword;
+
+        Long requestId = -1L;
+        try {
+            requestId = Long.valueOf(numericKeyword);
+        } catch (NumberFormatException ignored) {
+        }
+
+        return borrowRequestRepository.searchManagementRequests(
+                normalizedKeyword,
+                requestId,
+                status
+        );
+    }
+
+    @Override
     public BorrowRequest getRequestById(Long id) {
         return borrowRequestRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy yêu cầu mượn với id: " + id));
+                .orElseThrow(() -> new BorrowOperationException(id, "Không tìm thấy yêu cầu mượn với id: " + id));
     }
 
     @Override
     public void approveRequest(Long requestId, String librarianUsername) {
         BorrowRequest request = borrowRequestRepository.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy yêu cầu mượn với id: " + requestId));
+                .orElseThrow(() -> new BorrowOperationException(requestId, "Không tìm thấy yêu cầu mượn với id: " + requestId));
 
         if (request.getStatus() != BorrowStatus.PENDING) {
-            throw new RuntimeException("Yêu cầu mượn này đã được xử lý từ trước");
+            throw new BorrowOperationException(requestId, "Yêu cầu mượn này đã được xử lý từ trước");
         }
 
         User librarian = userRepository.findByUsername(librarianUsername)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy thủ thư với username: " + librarianUsername));
+                .orElseThrow(() -> new BorrowOperationException(requestId, "Không tìm thấy thủ thư với username: " + librarianUsername));
 
         // Process details
         if (request.getDetails() != null) {
             for (BorrowDetail detail : request.getDetails()) {
                 Book book = detail.getBook();
-                if (book.getAvailableQuantity() == null || book.getAvailableQuantity() <= 0) {
-                    throw new RuntimeException("Sách '" + book.getTitle() + "' đã hết, không thể phê duyệt");
+                if (Boolean.TRUE.equals(book.getIsDeleted())) {
+                    throw new RuntimeException("Sách '" + book.getTitle() + "' đã bị xóa khỏi hệ thống");
                 }
-                // Decrement quantity
+                if (book.getAvailableQuantity() == null || book.getAvailableQuantity() <= 0) {
+                    throw new BorrowOperationException(requestId, "Sách '" + book.getTitle() + "' đã hết, không thể phê duyệt");
+                }
                 book.setAvailableQuantity(book.getAvailableQuantity() - 1);
                 bookRepository.save(book);
 
-                // Populate details
                 detail.setReservedAt(LocalDateTime.now());
                 detail.setStatus(null); // Reserved but not yet borrowing
             }
@@ -149,18 +165,19 @@ public class BorrowServiceImpl implements BorrowService {
     @Override
     public void confirmPickup(Long requestId, String librarianUsername) {
         BorrowRequest request = borrowRequestRepository.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy yêu cầu mượn với id: " + requestId));
+                .orElseThrow(() -> new BorrowOperationException(requestId, "Không tìm thấy yêu cầu mượn với id: " + requestId));
 
         if (request.getStatus() != BorrowStatus.RESERVED) {
-            throw new RuntimeException("Yêu cầu mượn này không ở trạng thái giữ chỗ để nhận sách");
+            throw new BorrowOperationException(requestId, "Yêu cầu mượn này không ở trạng thái giữ chỗ để nhận sách");
         }
 
         User librarian = userRepository.findByUsername(librarianUsername)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy thủ thư với username: " + librarianUsername));
+                .orElseThrow(() -> new BorrowOperationException(requestId, "Không tìm thấy thủ thư với username: " + librarianUsername));
 
         if (request.getDetails() != null) {
             for (BorrowDetail detail : request.getDetails()) {
                 detail.setBorrowDate(LocalDateTime.now());
+                // detail.setDueDate(LocalDateTime.now().plusDays(5));
                 detail.setDueDate(LocalDateTime.now().plusMinutes(5));
                 detail.setStatus(BorrowItemStatus.BORROWING);
             }
@@ -175,14 +192,14 @@ public class BorrowServiceImpl implements BorrowService {
     @Override
     public void cancelReservation(Long requestId, String librarianUsername) {
         BorrowRequest request = borrowRequestRepository.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy yêu cầu mượn với id: " + requestId));
+                .orElseThrow(() -> new BorrowOperationException(requestId, "Không tìm thấy yêu cầu mượn với id: " + requestId));
 
         if (request.getStatus() != BorrowStatus.RESERVED) {
-            throw new RuntimeException("Yêu cầu mượn này không ở trạng thái giữ chỗ để hủy");
+            throw new BorrowOperationException(requestId, "Yêu cầu mượn này không ở trạng thái giữ chỗ để hủy");
         }
 
         User librarian = userRepository.findByUsername(librarianUsername)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy thủ thư với username: " + librarianUsername));
+                .orElseThrow(() -> new BorrowOperationException(requestId, "Không tìm thấy thủ thư với username: " + librarianUsername));
 
         if (request.getDetails() != null) {
             for (BorrowDetail detail : request.getDetails()) {
@@ -201,14 +218,14 @@ public class BorrowServiceImpl implements BorrowService {
     @Override
     public void rejectRequest(Long requestId, String librarianUsername) {
         BorrowRequest request = borrowRequestRepository.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy yêu cầu mượn với id: " + requestId));
+                .orElseThrow(() -> new BorrowOperationException(requestId, "Không tìm thấy yêu cầu mượn với id: " + requestId));
 
         if (request.getStatus() != BorrowStatus.PENDING) {
-            throw new RuntimeException("Yêu cầu mượn này đã được xử lý từ trước");
+            throw new BorrowOperationException(requestId, "Yêu cầu mượn này đã được xử lý từ trước");
         }
 
         User librarian = userRepository.findByUsername(librarianUsername)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy thủ thư với username: " + librarianUsername));
+                .orElseThrow(() -> new BorrowOperationException(requestId, "Không tìm thấy thủ thư với username: " + librarianUsername));
 
         request.setStatus(BorrowStatus.REJECTED);
         request.setLibrarian(librarian);
@@ -220,10 +237,10 @@ public class BorrowServiceImpl implements BorrowService {
     @Override
     public boolean recordReturn(Long requestId) {
         BorrowRequest request = borrowRequestRepository.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy yêu cầu mượn với id: " + requestId));
+                .orElseThrow(() -> new BorrowOperationException(requestId, "Không tìm thấy yêu cầu mượn với id: " + requestId));
 
         if (request.getStatus() != BorrowStatus.BORROWING) {
-            throw new RuntimeException("Không thể thực hiện trả cho yêu cầu mượn ở trạng thái này");
+            throw new BorrowOperationException(requestId, "Không thể thực hiện trả cho yêu cầu mượn ở trạng thái này");
         }
 
         LocalDateTime now = LocalDateTime.now();
@@ -234,14 +251,11 @@ public class BorrowServiceImpl implements BorrowService {
                 detail.setReturnDate(now);
 
                 // Calculate fine
-                long overdueSeconds = java.time.Duration.between(detail.getDueDate(), now).toSeconds();
-                if (overdueSeconds > 0) {
-                    // overdue by more than 0 seconds
-                    // 1,000 VND for every minute, round up
-                    long overdueMinutes = (overdueSeconds + 59) / 60;
-                    double fineAmount = overdueMinutes * 1000.0;
+                long overdue = Duration.between(detail.getDueDate(), now).toMinutes();
+                if (overdue > 0) {
+                    double fineAmount = overdue * 1000.0;
 
-                    com.library.management.entities.Fine fine = new com.library.management.entities.Fine();
+                    Fine fine = new Fine();
                     fine.setBorrowDetail(detail);
                     fine.setAmount(fineAmount);
                     fine.setReason(
@@ -254,7 +268,6 @@ public class BorrowServiceImpl implements BorrowService {
                     detail.setStatus(BorrowItemStatus.OVERDUE);
                     hasFine = true;
                 } else {
-                    // Directly complete return for this item if no fine
                     detail.setStatus(BorrowItemStatus.RETURNED);
                     Book book = detail.getBook();
                     book.setAvailableQuantity(book.getAvailableQuantity() + 1);
@@ -264,7 +277,6 @@ public class BorrowServiceImpl implements BorrowService {
         }
 
         if (!hasFine) {
-            // No fine was generated, directly mark request as RETURNED
             request.setStatus(BorrowStatus.RETURNED);
         }
 
@@ -275,21 +287,20 @@ public class BorrowServiceImpl implements BorrowService {
     @Override
     public void payFine(Long requestId) {
         BorrowRequest request = borrowRequestRepository.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy yêu cầu mượn với id: " + requestId));
+                .orElseThrow(() -> new BorrowOperationException(requestId, "Không tìm thấy yêu cầu mượn với id: " + requestId));
 
         if (request.getStatus() != BorrowStatus.BORROWING) {
-            throw new RuntimeException("Yêu cầu mượn này không ở trạng thái đang mượn để thanh toán phạt");
+            throw new BorrowOperationException(requestId, "Yêu cầu mượn này không ở trạng thái đang mượn để thanh toán phạt");
         }
 
         if (request.getDetails() != null) {
             for (BorrowDetail detail : request.getDetails()) {
-                com.library.management.entities.Fine fine = detail.getFine();
+                Fine fine = detail.getFine();
                 if (fine != null && !fine.getPaid()) {
                     fine.setPaid(true);
                     fine.setPaidAt(LocalDateTime.now());
                     fineRepository.save(fine);
 
-                    // Update detail status and inventory now that fine is paid
                     detail.setStatus(BorrowItemStatus.RETURNED);
                     Book book = detail.getBook();
                     book.setAvailableQuantity(book.getAvailableQuantity() + 1);

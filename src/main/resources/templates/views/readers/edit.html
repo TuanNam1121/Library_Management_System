@@ -17,6 +17,17 @@
             <div class="card-header bg-dark text-white">
                 <h3 class="mb-0">Update User</h3>
             </div>
+            <div th:if="${error}"
+                 style="
+        background:#dc3545;
+        color:white;
+        padding:12px 16px;
+        border-radius:8px;
+        margin-bottom:20px;
+        font-weight:600;
+     ">
+                <span th:text="${error}"></span>
+            </div>
 
             <div class="card-body" style="background-color:#252836">
 
@@ -42,7 +53,7 @@
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Email</label>
-                            <input class="form-control"
+                            <input class="form-control" type="email"
                                    th:field="*{email}">
                         </div>
 
@@ -54,7 +65,7 @@
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Phone</label>
-                            <input class="form-control"
+                            <input class="form-control" minlength="10" maxlength="10"
                                    th:field="*{phone}">
                         </div>
 

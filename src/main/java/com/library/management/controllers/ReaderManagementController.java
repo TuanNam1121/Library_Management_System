@@ -75,7 +75,16 @@ public class ReaderManagementController {
     public String editPost(@ModelAttribute("reader")User user,
                            @RequestParam("avatarFile") MultipartFile avatarFile,
                            @RequestParam("role_id")long role_id,
-                           @RequestParam(value = "birth", required = false)LocalDate birth) throws IOException {
+                           @RequestParam(value = "birth", required = false)LocalDate birth,
+                           Model model) throws IOException {
+
+        if(!userService.searchUser(user, userService.findById(user.getId()))){
+            model.addAttribute("error", "email/phone existed");
+            model.addAttribute("reader", user);
+            model.addAttribute("birth", user.getDob());
+            return "readers/edit";
+        }
+
         if (!avatarFile.isEmpty()) {
 
             // Create uploads folder if it doesn't exist

@@ -28,14 +28,11 @@ public class BookController {
     private final CategoryRepository categoryRepository;
     private final AuthorRepository authorRepository;
 
-    /**
-     * UC02 - Search Books: tìm kiếm theo title, author, category với paging
-     */
     @GetMapping("")
     public String searchBooks(@ModelAttribute BookSearchDTO searchDTO, Model model) {
         Page<BookReturnDTO> bookPage = bookService.searchBooks(searchDTO);
 
-        List<Category> categories = categoryRepository.findAll();
+        List<Category> categories = categoryRepository.findAllByIsDeletedFalseOrderByNameAsc();
         List<Author> authors = authorRepository.findAll();
 
         model.addAttribute("bookPage", bookPage);
@@ -52,14 +49,15 @@ public class BookController {
         return "books/list";
     }
 
-    /**
-     * UC03 - View Book Detail: xem thông tin chi tiết, ảnh bìa, tình trạng sẵn có
-     */
     @GetMapping("/{id}")
     public String viewBookDetail(@PathVariable Long id, Model model) {
-        BookReturnDTO book = bookService.getBookById(id);
-        model.addAttribute("book", book);
-        return "books/detail";
+        try {
+            BookReturnDTO book = bookService.getBookById(id);
+            model.addAttribute("book", book);
+            return "books/detail";
+        } catch (EntityNotFoundException e) {
+            return "redirect:/books?error=notfound";
+        }
     }
 
     @GetMapping("/new")
@@ -80,8 +78,14 @@ public class BookController {
         if (!"ADMIN".equals(session.getAttribute("userRole"))) {
             return "redirect:/books?error=unauthorized";
         }
-        BookReturnDTO created = bookService.createBook(form);
-        ra.addFlashAttribute("successMessage", "Đã thêm sách \"" + created.getTitle() + "\" thành công!");
+        try {
+            BookReturnDTO created = bookService.createBook(form);
+            ra.addFlashAttribute("successMessage", "Đã thêm sách \"" + created.getTitle() + "\" thành công!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", "Lỗi khi thêm sách: " + e.getMessage());
+            ra.addFlashAttribute("form", form);
+            return "redirect:/books/new";
+        }
         return "redirect:/books";
     }
 
@@ -90,23 +94,27 @@ public class BookController {
         if (!"ADMIN".equals(session.getAttribute("userRole"))) {
             return "redirect:/books?error=unauthorized";
         }
-        BookReturnDTO book = bookService.getBookByIdForAdmin(id);
-        if (!model.containsAttribute("form")) {
-            BookFormDTO form = new BookFormDTO();
-            form.setTitle(book.getTitle());
-            form.setIsbn(book.getIsbn());
-            form.setDescription(book.getDescription());
-            form.setQuantity(book.getQuantity());
-            form.setAvailableQuantity(book.getAvailableQuantity());
-            form.setCategoryId(book.getCategoryId());
-            form.setAuthorId(book.getAuthorId());
-            model.addAttribute("form", form);
-        }
+        try {
+            BookReturnDTO book = bookService.getBookByIdForAdmin(id);
+            if (!model.containsAttribute("form")) {
+                BookFormDTO form = new BookFormDTO();
+                form.setTitle(book.getTitle());
+                form.setIsbn(book.getIsbn());
+                form.setDescription(book.getDescription());
+                form.setQuantity(book.getQuantity());
+                form.setAvailableQuantity(book.getAvailableQuantity());
+                form.setCategoryId(book.getCategoryId());
+                form.setAuthorId(book.getAuthorId());
+                model.addAttribute("form", form);
+            }
 
-        model.addAttribute("book", book);
-        model.addAttribute("categories", categoryRepository.findAll());
-        model.addAttribute("authors", authorRepository.findAll());
-        return "books/edit";
+            model.addAttribute("book", book);
+            model.addAttribute("categories", categoryRepository.findAll());
+            model.addAttribute("authors", authorRepository.findAll());
+            return "books/edit";
+        } catch (EntityNotFoundException e) {
+            return "redirect:/books?error=notfound";
+        }
     }
 
     @PostMapping("/{id}/edit")
@@ -114,9 +122,17 @@ public class BookController {
         if (!"ADMIN".equals(session.getAttribute("userRole"))) {
             return "redirect:/books?error=unauthorized";
         }
-        BookReturnDTO updated = bookService.updateBook(id, form);
-        ra.addFlashAttribute("successMessage", "Đã cập nhật sách \"" + updated.getTitle() + "\"!");
-        return "redirect:/books/" + id;
+        try {
+            BookReturnDTO updated = bookService.updateBook(id, form);
+            ra.addFlashAttribute("successMessage", "Đã cập nhật sách \"" + updated.getTitle() + "\"!");
+            return "redirect:/books/" + id;
+        } catch (EntityNotFoundException e) {
+            return "redirect:/books?error=notfound";
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", "Lỗi khi cập nhật: " + e.getMessage());
+            ra.addFlashAttribute("form", form);
+            return "redirect:/books/" + id + "/edit";
+        }
     }
 
     @PostMapping("/{id}/delete")
@@ -124,8 +140,12 @@ public class BookController {
         if (!"ADMIN".equals(session.getAttribute("userRole"))) {
             return "redirect:/books?error=unauthorized";
         }
-        bookService.deleteBook(id);
-        ra.addFlashAttribute("successMessage", "Đã xóa sách thành công.");
+        try {
+            bookService.deleteBook(id);
+            ra.addFlashAttribute("successMessage", "Đã xóa sách thành công.");
+        } catch (EntityNotFoundException e) {
+            ra.addFlashAttribute("errorMessage", "Không tìm thấy sách.");
+        }
         return "redirect:/books";
     }
 }
