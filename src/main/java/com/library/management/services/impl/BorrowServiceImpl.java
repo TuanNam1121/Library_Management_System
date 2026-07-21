@@ -108,7 +108,6 @@ public class BorrowServiceImpl implements BorrowService {
         try {
             requestId = Long.valueOf(numericKeyword);
         } catch (NumberFormatException ignored) {
-            // A non-numeric keyword is matched against reader and book fields.
         }
 
         return borrowRequestRepository.searchManagementRequests(
@@ -257,7 +256,7 @@ public class BorrowServiceImpl implements BorrowService {
                     Fine fine = new Fine();
                     fine.setBorrowDetail(detail);
                     fine.setAmount(fineAmount);
-                    fine.setReason("Mượn quá hạn " + overdue + " phút ");
+                    fine.setReason("Muon qua han " + overdue + " phut ");
                     fine.setPaid(false);
                     fine.setIsDeleted(false);
 
