@@ -35,7 +35,7 @@ public class BookController {
     public String searchBooks(@ModelAttribute BookSearchDTO searchDTO, Model model) {
         Page<BookReturnDTO> bookPage = bookService.searchBooks(searchDTO);
 
-        List<Category> categories = categoryRepository.findAll();
+        List<Category> categories = categoryRepository.findAllByIsDeletedFalseOrderByNameAsc();
         List<Author> authors = authorRepository.findAll();
 
         model.addAttribute("bookPage", bookPage);
