@@ -155,4 +155,19 @@ public class UserServiceImpl implements UserService {
     public User findById(long id) {
         return userRepository.findById(id);
     }
+
+    @Override
+    public boolean searchUser(User oldUser, User newUser) {
+        if(
+                userRepository.searchUser(oldUser.getEmail()) != null&&
+                userRepository.searchUser(oldUser.getEmail()).getId() == newUser.getId()&&
+                userRepository.searchUser(oldUser.getPhone()) != null&&
+                userRepository.searchUser(oldUser.getPhone()).getId() == newUser.getId()){
+            return true;
+        }else if(userRepository.searchUser(oldUser.getEmail()) == null&&
+                userRepository.searchUser(oldUser.getPhone()) == null){
+            return true;
+        }
+        return false;
+    }
 }
