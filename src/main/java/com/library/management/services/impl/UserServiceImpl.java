@@ -164,6 +164,9 @@ public class UserServiceImpl implements UserService {
                 userRepository.searchUser(oldUser.getPhone()) != null&&
                 userRepository.searchUser(oldUser.getPhone()).getId() == newUser.getId()){
             return true;
+        }else if(userRepository.searchUser(oldUser.getEmail()) == null&&
+                userRepository.searchUser(oldUser.getPhone()) == null){
+            return true;
         }
         return false;
     }
