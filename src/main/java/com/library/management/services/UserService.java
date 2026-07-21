@@ -26,4 +26,6 @@ public interface UserService {
     void update(User user);
 
     User findById(long id);
+
+    boolean searchUser(User oldUser, User newUser);
 }

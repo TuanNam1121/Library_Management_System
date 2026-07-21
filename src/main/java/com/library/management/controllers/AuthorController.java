@@ -72,7 +72,7 @@ public class AuthorController {
         }
         authorService.delete(id);
         model.addAttribute("authors", authorService.findAll());
-        model.addAttribute("error", " deleted author "+id);
+        model.addAttribute("success", " deleted author "+id);
         return "authors/list";
     }
 
