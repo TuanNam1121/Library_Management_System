@@ -28,9 +28,6 @@ public class BookController {
     private final CategoryRepository categoryRepository;
     private final AuthorRepository authorRepository;
 
-    /**
-     * UC02 - Search Books: tìm kiếm theo title, author, category với paging
-     */
     @GetMapping("")
     public String searchBooks(@ModelAttribute BookSearchDTO searchDTO, Model model) {
         Page<BookReturnDTO> bookPage = bookService.searchBooks(searchDTO);
@@ -52,9 +49,6 @@ public class BookController {
         return "books/list";
     }
 
-    /**
-     * UC03 - View Book Detail: xem thông tin chi tiết, ảnh bìa, tình trạng sẵn có
-     */
     @GetMapping("/{id}")
     public String viewBookDetail(@PathVariable Long id, Model model) {
         try {

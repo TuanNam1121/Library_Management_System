@@ -1,6 +1,5 @@
 package com.library.management.controllers;
 
-import com.library.management.dto.LoginedUserDTO;
 import com.library.management.entities.BorrowDetail;
 import com.library.management.entities.BorrowRequest;
 import com.library.management.enums.BorrowStatus;
@@ -9,14 +8,11 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,22 +25,22 @@ public class BorrowController {
     private final BorrowService borrowService;
 
     @PostMapping("/request/{bookId}")
-    public String submitBorrowRequest(@PathVariable Long bookId, HttpSession session) {
+    public String submitBorrowRequest(@PathVariable Long bookId,
+                                      HttpSession session,
+                                      RedirectAttributes ra) {
         String loggedInUser = (String) session.getAttribute("loggedInUser");
         String userRole = (String) session.getAttribute("userRole");
         if (loggedInUser == null) {
             return "redirect:/auths/login";
         }
         if (!"READER".equals(userRole)) {
-            return "redirect:/books/" + bookId + "?borrowError=" + URLEncoder.encode("Chỉ có Độc giả mới có quyền mượn sách", StandardCharsets.UTF_8);
+            ra.addFlashAttribute("borrowError", "Chỉ có Độc giả mới có quyền mượn sách");
+            return "redirect:/books/" + bookId;
         }
 
-        try {
-            borrowService.createBorrowRequest(loggedInUser, bookId);
-            return "redirect:/books/" + bookId + "?borrowSuccess=true";
-        } catch (RuntimeException ex) {
-            return "redirect:/books/" + bookId + "?borrowError=" + URLEncoder.encode(ex.getMessage(), StandardCharsets.UTF_8);
-        }
+        borrowService.createBorrowRequest(loggedInUser, bookId);
+        ra.addFlashAttribute("borrowSuccess", true);
+        return "redirect:/books/" + bookId;
     }
 
     @GetMapping("/history")
@@ -126,8 +122,9 @@ public class BorrowController {
             return "redirect:/auths/login";
         }
 
+        // BorrowOperationException sẽ được BorrowGlobalException bắt nếu không tìm thấy
         BorrowRequest request = borrowService.getRequestById(id);
-        
+
         // Security check: reader can only see their own requests
         if ("READER".equals(userRole) && !request.getReader().getUsername().equals(loginUser)) {
             return "redirect:/books";
@@ -151,7 +148,9 @@ public class BorrowController {
     }
 
     @PostMapping("/{id}/approve")
-    public String approveRequest(@PathVariable Long id, HttpSession session) {
+    public String approveRequest(@PathVariable Long id,
+                                 HttpSession session,
+                                 RedirectAttributes ra) {
         String loginUser = (String) session.getAttribute("loggedInUser");
         String userRole = (String) session.getAttribute("userRole");
         if (loginUser == null) {
@@ -161,16 +160,15 @@ public class BorrowController {
             return "redirect:/books";
         }
 
-        try {
-            borrowService.approveRequest(id, loginUser);
-            return "redirect:/borrows/" + id + "?success=approved";
-        } catch (RuntimeException ex) {
-            return "redirect:/borrows/" + id + "?error=" + URLEncoder.encode(ex.getMessage(), StandardCharsets.UTF_8);
-        }
+        borrowService.approveRequest(id, loginUser);
+        ra.addFlashAttribute("borrowSuccess", "approved");
+        return "redirect:/borrows/" + id;
     }
 
     @PostMapping("/{id}/reject")
-    public String rejectRequest(@PathVariable Long id, HttpSession session) {
+    public String rejectRequest(@PathVariable Long id,
+                                HttpSession session,
+                                RedirectAttributes ra) {
         String loginUser = (String) session.getAttribute("loggedInUser");
         String userRole = (String) session.getAttribute("userRole");
         if (loginUser == null) {
@@ -180,16 +178,15 @@ public class BorrowController {
             return "redirect:/books";
         }
 
-        try {
-            borrowService.rejectRequest(id, loginUser);
-            return "redirect:/borrows/" + id + "?success=rejected";
-        } catch (RuntimeException ex) {
-            return "redirect:/borrows/" + id + "?error=" + URLEncoder.encode(ex.getMessage(), StandardCharsets.UTF_8);
-        }
+        borrowService.rejectRequest(id, loginUser);
+        ra.addFlashAttribute("borrowSuccess", "rejected");
+        return "redirect:/borrows/" + id;
     }
 
     @PostMapping("/{id}/confirm-pickup")
-    public String confirmPickup(@PathVariable Long id, HttpSession session) {
+    public String confirmPickup(@PathVariable Long id,
+                                HttpSession session,
+                                RedirectAttributes ra) {
         String loginUser = (String) session.getAttribute("loggedInUser");
         String userRole = (String) session.getAttribute("userRole");
         if (loginUser == null) {
@@ -199,16 +196,15 @@ public class BorrowController {
             return "redirect:/books";
         }
 
-        try {
-            borrowService.confirmPickup(id, loginUser);
-            return "redirect:/borrows/" + id + "?success=pickupConfirmed";
-        } catch (RuntimeException ex) {
-            return "redirect:/borrows/" + id + "?error=" + URLEncoder.encode(ex.getMessage(), StandardCharsets.UTF_8);
-        }
+        borrowService.confirmPickup(id, loginUser);
+        ra.addFlashAttribute("borrowSuccess", "pickupConfirmed");
+        return "redirect:/borrows/" + id;
     }
 
     @PostMapping("/{id}/cancel")
-    public String cancelReservation(@PathVariable Long id, HttpSession session) {
+    public String cancelReservation(@PathVariable Long id,
+                                    HttpSession session,
+                                    RedirectAttributes ra) {
         String loginUser = (String) session.getAttribute("loggedInUser");
         String userRole = (String) session.getAttribute("userRole");
         if (loginUser == null) {
@@ -218,16 +214,15 @@ public class BorrowController {
             return "redirect:/books";
         }
 
-        try {
-            borrowService.cancelReservation(id, loginUser);
-            return "redirect:/borrows/" + id + "?success=reservationCancelled";
-        } catch (RuntimeException ex) {
-            return "redirect:/borrows/" + id + "?error=" + URLEncoder.encode(ex.getMessage(), StandardCharsets.UTF_8);
-        }
+        borrowService.cancelReservation(id, loginUser);
+        ra.addFlashAttribute("borrowSuccess", "reservationCancelled");
+        return "redirect:/borrows/" + id;
     }
 
     @PostMapping("/{id}/return")
-    public String recordReturn(@PathVariable Long id, HttpSession session) {
+    public String recordReturn(@PathVariable Long id,
+                               HttpSession session,
+                               RedirectAttributes ra) {
         String loginUser = (String) session.getAttribute("loggedInUser");
         String userRole = (String) session.getAttribute("userRole");
         if (loginUser == null) {
@@ -237,20 +232,19 @@ public class BorrowController {
             return "redirect:/books";
         }
 
-        try {
-            boolean hasFine = borrowService.recordReturn(id);
-            if (hasFine) {
-                // Has unpaid fine — stay on page to show fine info and payment button
-                return "redirect:/borrows/" + id + "?success=returnedWithFine";
-            }
-            return "redirect:/borrows/" + id + "?success=returned";
-        } catch (RuntimeException ex) {
-            return "redirect:/borrows/" + id + "?error=" + URLEncoder.encode(ex.getMessage(), StandardCharsets.UTF_8);
+        boolean hasFine = borrowService.recordReturn(id);
+        if (hasFine) {
+            ra.addFlashAttribute("borrowSuccess", "returnedWithFine");
+        } else {
+            ra.addFlashAttribute("borrowSuccess", "returned");
         }
+        return "redirect:/borrows/" + id;
     }
 
     @PostMapping("/{id}/pay-fine")
-    public String payFine(@PathVariable Long id, HttpSession session) {
+    public String payFine(@PathVariable Long id,
+                          HttpSession session,
+                          RedirectAttributes ra) {
         String loginUser = (String) session.getAttribute("loggedInUser");
         String userRole = (String) session.getAttribute("userRole");
         if (loginUser == null) {
@@ -260,11 +254,8 @@ public class BorrowController {
             return "redirect:/books";
         }
 
-        try {
-            borrowService.payFine(id);
-            return "redirect:/borrows/" + id + "?success=paid";
-        } catch (RuntimeException ex) {
-            return "redirect:/borrows/" + id + "?error=" + URLEncoder.encode(ex.getMessage(), StandardCharsets.UTF_8);
-        }
+        borrowService.payFine(id);
+        ra.addFlashAttribute("borrowSuccess", "paid");
+        return "redirect:/borrows/" + id;
     }
 }
