@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <th:block th:replace="~{fragments/common :: head(title='Danh sách Thể loại - LibraryHub', description='Quản lý danh sách thể loại sách')}"></th:block>
+    <th:block
+            th:replace="~{fragments/common :: head(title='Danh sách Thể loại - LibraryHub', description='Quản lý danh sách thể loại sách')}"></th:block>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link href="/css/library.css" rel="stylesheet">
@@ -15,72 +16,145 @@
         <h1 class="hero-title">Quản lý <span>Thể loại Sách</span></h1>
         <p class="hero-subtitle">Quản lý và theo dõi các thể loại sách hiện có trong hệ thống</p>
         <div style="margin-top: 1.5rem;">
-            <a th:href="@{/categories/create}" class="btn btn-primary">➕ Thêm Thể loại mới</a>
+            <a th:href="@{/categories/create}" class="btn btn-primary">Thêm Thể loại mới</a>
         </div>
     </div>
 </section>
 
 <main class="section-wrapper">
     <div class="container">
-        <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show mb-4 shadow-lg" role="alert"
+        <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show mb-4 shadow-lg"
+             role="alert"
              style="max-width: 1100px; margin: 0 auto; background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: var(--accent-success);">
             <strong>Thành công!</strong> Đã thêm thể loại mới vào danh sách.
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-        <div th:if="${param.updated}" class="alert alert-success alert-dismissible fade show mb-4 shadow-lg" role="alert" 
+        <div th:if="${param.updated}" class="alert alert-success alert-dismissible fade show mb-4 shadow-lg"
+             role="alert"
              style="max-width: 1100px; margin: 0 auto; background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: var(--accent-success);">
             <strong>Thành công!</strong> Đã cập nhật thông tin thể loại.
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-        <div th:if="${param.deleted}" class="alert alert-success alert-dismissible fade show mb-4 shadow-lg" role="alert" 
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show mb-4 shadow-lg"
+             role="alert"
              style="max-width: 1100px; margin: 0 auto; background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: var(--accent-success);">
-            <strong>Thành công!</strong> Đã xóa thể loại khỏi hệ thống.
+            <strong>Thành công!</strong> <span th:text="${successMessage}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show mb-4 shadow-lg"
+             role="alert"
+             style="max-width: 1100px; margin: 0 auto; background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: var(--accent-danger);">
+            <strong>Không thể xóa!</strong> <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <form th:action="@{/categories}" method="get" class="search-form-wrapper"
+              style="max-width: 1100px; margin: 0 auto 1.5rem; padding: 1.25rem;">
+            <div class="d-flex gap-2">
+                <input type="text"
+                       name="name"
+                       class="form-control search-input category-search-input"
+                       style="color: #ffffff !important; -webkit-text-fill-color: #ffffff !important; caret-color: #ffffff;"
+                       th:value="${searchName}"
+                       placeholder="Tìm theo tên thể loại..."
+                       autocomplete="off">
+                <input type="hidden" name="page" value="0">
+                <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+                <a th:if="${searchName != null and !#strings.isEmpty(searchName)}"
+                   th:href="@{/categories}"
+                   class="btn btn-outline">Xóa lọc</a>
+            </div>
+        </form>
 
         <div class="search-form-wrapper" style="max-width: 1100px; margin: 0 auto; padding: 2rem;">
             <div class="table-responsive">
                 <table class="table mb-0" style="color: var(--text-primary);">
                     <thead>
-                        <tr style="border-bottom: 1px solid var(--glass-border);">
-                            <th style="width: 8%; color: var(--text-secondary); border: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">ID</th>
-                            <th style="width: 27%; color: var(--text-secondary); border: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Tên Thể Loại</th>
-                            <th style="width: 35%; color: var(--text-secondary); border: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Mô Tả</th>
-                            <th style="width: 30%; color: var(--text-secondary); border: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;" class="text-center">Thao Tác</th>
-                        </tr>
+                    <tr style="border-bottom: 1px solid var(--glass-border);">
+                        <th style="width: 8%; color: var(--text-secondary); border: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                            STT
+                        </th>
+                        <th style="width: 27%; color: var(--text-secondary); border: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                            Tên Thể Loại
+                        </th>
+                        <th style="width: 35%; color: var(--text-secondary); border: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                            Mô Tả
+                        </th>
+                        <th style="width: 30%; color: var(--text-secondary); border: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;"
+                            class="text-center">Thao Tác
+                        </th>
+                    </tr>
                     </thead>
                     <tbody>
-                        <tr th:each="cat : ${categories}" style="border-bottom: 1px solid var(--glass-border);">
-                            <td style="color: var(--text-secondary); border: none; vertical-align: middle;" th:text="${cat.id}">1</td>
-                            <td style="font-weight: 700; color: var(--text-primary); border: none; vertical-align: middle;" th:text="${cat.name}">Tên thể loại</td>
-                            <td style="color: var(--text-secondary); border: none; vertical-align: middle; font-size: 0.95rem;" th:text="${cat.description ?: 'Không có mô tả'}">Mô tả chi tiết</td>
-                            <td class="text-center" style="border: none; vertical-align: middle;">
-                                <div class="d-flex justify-content-center gap-2">
-                                    <a th:href="@{/books(categoryId=${cat.id})}" class="btn btn-outline btn-sm">
-                                        📚 Xem sách
-                                    </a>
-                                    <a th:href="@{/categories/edit/{id}(id=${cat.id})}" class="btn btn-outline btn-sm" style="color: var(--accent-warning); border-color: var(--accent-warning);">
-                                        ✏️ Sửa
-                                    </a>
-                                    <a th:href="@{/categories/delete/{id}(id=${cat.id})}" class="btn btn-outline btn-sm" style="color: var(--accent-danger); border-color: var(--accent-danger);" onclick="return confirm('Bạn có chắc chắn muốn xóa thể loại này không?');">
-                                        🗑️ Xóa
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr th:if="${#lists.isEmpty(categories)}">
-                            <td colspan="4" class="text-center py-5" style="border: none;">
-                                <div class="empty-state" style="padding: 2rem 1rem;">
-                                    <div class="empty-state-icon">📂</div>
-                                    <h3>Chưa có thể loại sách nào</h3>
-                                    <p>Hãy bắt đầu bằng cách tạo thể loại sách đầu tiên trong hệ thống.</p>
-                                    <a th:href="@{/categories/create}" class="btn btn-primary" style="margin-top: 1.5rem;">Tạo thể loại đầu tiên</a>
-                                </div>
-                            </td>
-                        </tr>
+                    <tr th:each="cat, index : ${categories}" style="border-bottom: 1px solid var(--glass-border);">
+                        <td style="color: var(--text-secondary); border: none; vertical-align: middle;"
+                            th:text="${currentPage * pageSize + index.count}">1
+                        </td>
+                        <td style="font-weight: 700; color: var(--text-primary); border: none; vertical-align: middle;"
+                            th:text="${cat.name}">Tên thể loại
+                        </td>
+                        <td style="color: var(--text-secondary); border: none; vertical-align: middle; font-size: 0.95rem;"
+                            th:text="${cat.description ?: 'Không có mô tả'}">Mô tả chi tiết
+                        </td>
+                        <td class="text-center" style="border: none; vertical-align: middle;">
+                            <div class="d-flex justify-content-center gap-2">
+                                <a th:href="@{/categories/{id}/books(id=${cat.id})}" class="btn btn-outline btn-sm">Xem sách
+                                </a>
+                                <a th:href="@{/categories/edit/{id}(id=${cat.id})}" class="btn btn-outline btn-sm"
+                                   style="color: var(--accent-warning); border-color: var(--accent-warning);">Sửa</a>
+                                <form th:action="@{/categories/delete/{id}(id=${cat.id})}"
+                                      method="post"
+                                      style="display: inline;"
+                                      onsubmit="return confirm('Bạn có chắc chắn muốn xóa thể loại và toàn bộ sách thuộc thể loại này không?');">
+                                    <button type="submit" class="btn btn-outline btn-sm"
+                                            style="color: var(--accent-danger); border-color: var(--accent-danger);">
+                                        Xóa
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(categories)}">
+                        <td colspan="4" class="text-center py-5" style="border: none;">
+                            <div class="empty-state" style="padding: 2rem 1rem;">
+                                <div class="empty-state-icon"></div>
+                                <h3>Chưa có thể loại sách nào</h3>
+                                <p>Hãy bắt đầu bằng cách tạo thể loại sách đầu tiên trong hệ thống.</p>
+                                <a th:href="@{/categories/create}" class="btn btn-primary" style="margin-top: 1.5rem;">Tạo
+                                    thể loại đầu tiên</a>
+                            </div>
+                        </td>
+                    </tr>
                     </tbody>
                 </table>
             </div>
+        </div>
+
+        <div class="pagination-wrapper" th:if="${totalPages > 1}">
+            <a class="page-btn"
+               th:classappend="${currentPage == 0 ? ' disabled' : ''}"
+               th:href="@{/categories(name=${searchName},page=0)}">«</a>
+
+            <a class="page-btn"
+               th:classappend="${currentPage == 0 ? ' disabled' : ''}"
+               th:href="@{/categories(name=${searchName},page=${currentPage - 1})}">‹</a>
+
+            <th:block th:with="startPage=${T(java.lang.Math).max(0, currentPage - 2)},
+                               endPage=${T(java.lang.Math).min(totalPages - 1, currentPage + 2)}">
+                <a th:each="i : ${#numbers.sequence(startPage, endPage)}"
+                   class="page-btn"
+                   th:classappend="${i == currentPage ? ' active' : ''}"
+                   th:href="@{/categories(name=${searchName},page=${i})}"
+                   th:text="${i + 1}">1</a>
+            </th:block>
+
+            <a class="page-btn"
+               th:classappend="${currentPage == totalPages - 1 ? ' disabled' : ''}"
+               th:href="@{/categories(name=${searchName},page=${currentPage + 1})}">›</a>
+
+            <a class="page-btn"
+               th:classappend="${currentPage == totalPages - 1 ? ' disabled' : ''}"
+               th:href="@{/categories(name=${searchName},page=${totalPages - 1})}">»</a>
         </div>
     </div>
 </main>

@@ -146,6 +146,9 @@ public class BorrowServiceImpl implements BorrowService {
         if (request.getDetails() != null) {
             for (BorrowDetail detail : request.getDetails()) {
                 Book book = detail.getBook();
+                if (Boolean.TRUE.equals(book.getIsDeleted())) {
+                    throw new RuntimeException("Sách '" + book.getTitle() + "' đã bị xóa khỏi hệ thống");
+                }
                 if (book.getAvailableQuantity() == null || book.getAvailableQuantity() <= 0) {
                     throw new RuntimeException("Sách '" + book.getTitle() + "' đã hết, không thể phê duyệt");
                 }
