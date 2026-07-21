@@ -40,6 +40,16 @@ public class AuthorController {
         return "redirect:/authors";
     }
 
+    @GetMapping("/view/{id}")
+    public String view(@PathVariable Long id,
+                       Model model){
+
+        model.addAttribute("author",authorService.findById(id));
+        model.addAttribute("books", bookService.findByAuthorID(id));
+
+        return "authors/view";
+    }
+
     @GetMapping("/edit/{id}")
     public String edit(@PathVariable Long id,
                        Model model){

@@ -50,7 +50,7 @@ public class UserServiceImpl implements UserService {
         user.setDob(registerRequest.getDob());
         user.setEnabled(true);
 
-        Role readerRole = roleRepository.findById(1L).orElseThrow(() -> new RuntimeException("Reader role not found "));
+        Role readerRole = roleRepository.findById(3L).orElseThrow(() -> new RuntimeException("Reader role not found "));
         user.setRole(readerRole);
         userRepository.save(user);
     }
@@ -59,6 +59,10 @@ public class UserServiceImpl implements UserService {
     public User login(LoginRequestDTO dto) {
         User user = userRepository.findByUsername(dto.getUsername())
                 .orElseThrow(() -> new UsernameNotExistException("Tài khoản không tồn tại"));
+
+        if (!user.getEnabled()) {
+            throw new WrongPasswordOrUserNameException("Tài khoản chưa được kích hoạt");
+        }
 
         if (!user.getPassword().equals(dto.getPassword())) {
             throw new WrongPasswordOrUserNameException("Sai tên đăng nhập hoặc mật khẩu");

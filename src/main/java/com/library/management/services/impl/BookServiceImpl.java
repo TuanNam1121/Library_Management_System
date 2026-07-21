@@ -132,6 +132,11 @@ public class BookServiceImpl implements BookService {
         return bookRepository.existAuthor(id);
     }
 
+    @Override
+    public List<Book> findByAuthorID(long id) {
+        return bookRepository.findByAuthor(id);
+    }
+
     // ---- Helpers ----
 
     private void applyCategory(Book book, Long categoryId) {

@@ -10,5 +10,5 @@ public class BookSearchDTO {
     private Long authorId;
     private Long categoryId;
     private int page = 0;
-    private int size = 9;
+    private int size = 8;
 }

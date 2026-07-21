@@ -35,9 +35,7 @@ public class BorrowRequest extends BaseEntity{
     private LocalDateTime approvedAt;
 
     @OneToMany(
-
             mappedBy = "borrowRequest",
-
             cascade = CascadeType.ALL
     )
     private List<BorrowDetail> details;

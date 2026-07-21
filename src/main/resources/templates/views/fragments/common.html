@@ -29,7 +29,6 @@
             <!-- Nav links: READER (UC02, UC05) -->
             <div th:if="${session.loggedInUser != null and session.userRole == 'READER'}" class="nav-links">
                 <a class="nav-link" th:href="@{/books}">Tìm sách</a>
-                <a class="nav-link" th:href="@{/categories}">Thể loại</a>
                 <a class="nav-link" th:href="@{/borrows/history}">Lịch sử mượn</a>
                 <a class="nav-link" th:href="@{/borrows/overdue}">Sách quá hạn</a>
             </div>
@@ -41,6 +40,7 @@
                 <a class="nav-link" th:href="@{/authors}">Quản lý Tác giả</a>
                 <a class="nav-link" th:href="@{/readers}">Quản lý Đọc giả</a>
                 <a class="nav-link" th:href="@{/statistics}">Thống kê</a>
+                <a class="nav-link" th:href="@{/readers}">Quản lý Người dùng</a>
             </div>
 
             <!-- Nav links: LIBRARIAN (UC06, UC07) -->
@@ -50,11 +50,7 @@
                 <a class="nav-link" th:href="@{/librarian/renew}">Quản lý gia hạn sách</a>
             </div>
 
-            <!-- Nav links: Guest (chưa đăng nhập) -->
-            <div th:if="${session.loggedInUser == null}" class="nav-links">
-                <a class="nav-link" th:href="@{/books}">Tìm sách</a>
 
-            </div>
 
 
 
