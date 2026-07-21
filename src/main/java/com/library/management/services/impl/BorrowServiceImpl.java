@@ -259,7 +259,7 @@ public class BorrowServiceImpl implements BorrowService {
                     fine.setBorrowDetail(detail);
                     fine.setAmount(fineAmount);
                     fine.setReason(
-                            "Mượn quá hạn " + (overdueSeconds / 60) + " phút " + (overdueSeconds % 60) + " giây");
+                            "Muon qua han " + overdue + "phut (Moi phut 10.000VND)");
                     fine.setPaid(false);
                     fine.setIsDeleted(false);
 

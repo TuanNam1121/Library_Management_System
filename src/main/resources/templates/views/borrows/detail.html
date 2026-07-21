@@ -311,7 +311,7 @@
                 style="border-top: 1px solid var(--glass-border);">
                 <!-- Back button depending on role -->
                 <div>
-                    <a th:if="${session.userRole == 'LIBRARIAN'}" th:href="@{/borrows/requests}"
+                    <a th:if="${session.userRole == 'LIBRARIAN'}" th:href="@{/borrows/management}"
                         class="btn btn-outline">← Quay lại danh sách chờ</a>
                     <a th:if="${session.userRole == 'READER'}" th:href="@{/borrows/history}" class="btn btn-outline">←
                         Quay lại lịch sử mượn</a>

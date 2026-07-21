@@ -28,7 +28,7 @@
         <!-- Requests History Table -->
         <div class="search-form-wrapper" style="max-width: 1100px; margin: 0 auto; padding: 2rem;">
             <div class="table-responsive">
-                <table class="table mb-0" style="color: var(--text-primary); border-color: var(--glass-border);">
+                <table class="table mb-0" style="color: var(--text-primary); border-color: var(--glass-border); width: max-content; min-width: 100%">
                     <thead>
                         <tr style="border-bottom: 1px solid var(--glass-border);">
                             <th style="width: 10%; color: var(--text-secondary); border: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Mã Yêu Cầu</th>
@@ -56,7 +56,7 @@
                                     <span th:text="${detail.dueDate != null ? #temporals.format(detail.dueDate, 'dd/MM/yyyy HH:mm:ss') : '—'}">—</span>
                                 </span>
                             </td>
-                            <td style="border: none;">
+                            <td style="border: none; min-width: 150px;">
                                 <span th:if="${req.status == T(com.library.management.enums.BorrowStatus).PENDING}"
                                       style="color: var(--accent-warning); background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600;">
                                     Đang chờ duyệt
@@ -76,7 +76,9 @@
                                     Đã từ chối
                                 </span>
                                 <span th:if="${req.status == T(com.library.management.enums.BorrowStatus).RETURNED}"
-                                      style="color: #60a5fa; background: rgba(96,165,250,0.15); border: 1px solid rgba(96,165,250,0.3); padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600;">
+                                      th:with="wasOverdue=${req.details != null and !req.details.isEmpty() and req.details[0].borrowDate != null and req.details[0].returnDate != null and T(java.time.Duration).between(req.details[0].borrowDate, req.details[0].returnDate).toMinutes() >= 5}"
+                                      th:style="${wasOverdue} ? 'color: #f59e0b; background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600;' : 'color: #60a5fa; background: rgba(96,165,250,0.15); border: 1px solid rgba(96,165,250,0.3); padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600;'"
+                                      th:text="${wasOverdue} ? 'Đã trả (Quá hạn)' : 'Đã trả sách'">
                                     Đã trả sách
                                 </span>
                                 <span th:if="${req.status == T(com.library.management.enums.BorrowStatus).CANCELLED}"

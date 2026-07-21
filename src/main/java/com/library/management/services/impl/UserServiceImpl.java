@@ -158,15 +158,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean searchUser(User oldUser, User newUser) {
-        //unchange
-        if(
-                userRepository.searchUser(oldUser.getEmail()) != null&&
-                userRepository.searchUser(oldUser.getEmail()).getId() == newUser.getId()&&
-                userRepository.searchUser(oldUser.getPhone()) != null&&
-                userRepository.searchUser(oldUser.getPhone()).getId() == newUser.getId()){
-            return true;
-            //at least one of which changed
-        }else if((userRepository.searchUser(oldUser.getEmail()) == null ||
+        if((userRepository.searchUser(oldUser.getEmail()) == null ||
                 userRepository.searchUser(oldUser.getEmail()).getId() == newUser.getId())&&
                 (userRepository.searchUser(oldUser.getPhone()) == null) ||
                 userRepository.searchUser(oldUser.getPhone()).getId() == newUser.getId()){

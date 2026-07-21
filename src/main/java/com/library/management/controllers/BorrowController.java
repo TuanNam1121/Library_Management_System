@@ -124,15 +124,12 @@ public class BorrowController {
             return "redirect:/auths/login";
         }
 
-        // BorrowOperationException sẽ được BorrowGlobalException bắt nếu không tìm thấy
         BorrowRequest request = borrowService.getRequestById(id);
 
-        // Security check: reader can only see their own requests
         if ("READER".equals(userRole) && !request.getReader().getUsername().equals(loginUser)) {
             return "redirect:/books";
         }
 
-        // Tính số giây còn lại của thời gian giữ chỗ (server-side)
         if (request.getStatus() == BorrowStatus.RESERVED
                 && request.getDetails() != null
                 && !request.getDetails().isEmpty()
@@ -140,6 +137,7 @@ public class BorrowController {
             LocalDateTime reservedAt = request.getDetails().get(0).getReservedAt();
             LocalDateTime expireAt = reservedAt.plusMinutes(1);
             long secondsLeft = Duration.between(LocalDateTime.now(), expireAt).getSeconds();
+            
             model.addAttribute("reservationSecondsLeft", secondsLeft);
         } else {
             model.addAttribute("reservationSecondsLeft", null);
