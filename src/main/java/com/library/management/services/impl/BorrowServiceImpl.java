@@ -9,6 +9,7 @@ import com.library.management.exception.BorrowSubmitException;
 import com.library.management.repositories.BookRepository;
 import com.library.management.repositories.BorrowDetailRepository;
 import com.library.management.repositories.BorrowRequestRepository;
+import com.library.management.repositories.FineRepository;
 import com.library.management.repositories.UserRepository;
 import com.library.management.services.BorrowService;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +31,7 @@ public class BorrowServiceImpl implements BorrowService {
     private final UserRepository userRepository;
     private final BookRepository bookRepository;
     private final BorrowDetailRepository borrowDetailRepository;
-    private final com.library.management.repositories.FineRepository fineRepository;
+    private final FineRepository fineRepository;
 
     @Override
     public BorrowRequest createBorrowRequest(String username, Long bookId) {
@@ -52,7 +53,8 @@ public class BorrowServiceImpl implements BorrowService {
             throw new BorrowSubmitException(bookId, "Sách hiện tại không có sẵn bản nào để mượn");
         }
 
-        List<BorrowStatus> activeStatuses = List.of(BorrowStatus.PENDING, BorrowStatus.RESERVED, BorrowStatus.BORROWING);
+        List<BorrowStatus> activeStatuses = List.of(BorrowStatus.PENDING, BorrowStatus.RESERVED,
+                BorrowStatus.BORROWING);
         if (borrowRequestRepository.existsActiveBorrowRequest(username, bookId, activeStatuses)) {
             throw new BorrowSubmitException(bookId, "Bạn đã gửi yêu cầu mượn hoặc đang giữ chỗ/mượn cuốn sách này rồi.");
         }
@@ -256,7 +258,8 @@ public class BorrowServiceImpl implements BorrowService {
                     Fine fine = new Fine();
                     fine.setBorrowDetail(detail);
                     fine.setAmount(fineAmount);
-                    fine.setReason("Muon qua han " + overdue + " phut ");
+                    fine.setReason(
+                            "Mượn quá hạn " + (overdueSeconds / 60) + " phút " + (overdueSeconds % 60) + " giây");
                     fine.setPaid(false);
                     fine.setIsDeleted(false);
 
