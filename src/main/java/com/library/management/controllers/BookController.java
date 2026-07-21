@@ -35,7 +35,7 @@ public class BookController {
     public String searchBooks(@ModelAttribute BookSearchDTO searchDTO, Model model) {
         Page<BookReturnDTO> bookPage = bookService.searchBooks(searchDTO);
 
-        List<Category> categories = categoryRepository.findAllByIsDeletedFalseOrderByNameAsc();
+        List<Category> categories = categoryRepository.findAll();
         List<Author> authors = authorRepository.findAll();
 
         model.addAttribute("bookPage", bookPage);
@@ -74,7 +74,7 @@ public class BookController {
         if (!model.containsAttribute("form")) {
             model.addAttribute("form", new BookFormDTO());
         }
-        model.addAttribute("categories", categoryRepository.findAllByIsDeletedFalseOrderByNameAsc());
+        model.addAttribute("categories", categoryRepository.findAll());
         model.addAttribute("authors", authorRepository.findAll());
         return "books/add";
     }
@@ -115,7 +115,7 @@ public class BookController {
             }
 
             model.addAttribute("book", book);
-            model.addAttribute("categories", categoryRepository.findAllByIsDeletedFalseOrderByNameAsc());
+            model.addAttribute("categories", categoryRepository.findAll());
             model.addAttribute("authors", authorRepository.findAll());
             return "books/edit";
         } catch (EntityNotFoundException e) {

@@ -40,4 +40,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     @Query("FROM Book b where b.author.id = :authorID")
     Book existAuthor(@Param("authorID") Long id);
+
+    @Query("FROM Book b where b.author.id = :authorID")
+    List<Book> findByAuthor(@Param("authorID") Long id);
 }

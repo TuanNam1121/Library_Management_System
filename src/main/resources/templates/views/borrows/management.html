@@ -27,16 +27,44 @@
         
         <!-- Requests List Table -->
         <div class="search-form-wrapper" style="max-width: 1100px; margin: 0 auto; padding: 2rem;">
+            <form th:action="@{/borrows/management}" method="get" class="row g-3 align-items-end mb-4">
+                <div class="col-lg-6 col-md-12">
+                    <label for="keyword" class="form-label">Tìm kiếm</label>
+                    <input id="keyword" name="keyword" type="text" class="form-input"
+                           th:value="${keyword}"
+                           placeholder="Mã yêu cầu, độc giả, username, tên sách hoặc ISBN">
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <label for="status" class="form-label">Trạng thái mượn</label>
+                    <select id="status" name="status" class="form-input">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="PENDING" th:selected="${selectedStatus == T(com.library.management.enums.BorrowStatus).PENDING}">Chờ duyệt</option>
+                        <option value="RESERVED" th:selected="${selectedStatus == T(com.library.management.enums.BorrowStatus).RESERVED}">Đang giữ chỗ</option>
+                        <option value="BORROWING" th:selected="${selectedStatus == T(com.library.management.enums.BorrowStatus).BORROWING}">Đang mượn</option>
+                        <option value="RETURNED" th:selected="${selectedStatus == T(com.library.management.enums.BorrowStatus).RETURNED}">Đã trả</option>
+                        <option value="REJECTED" th:selected="${selectedStatus == T(com.library.management.enums.BorrowStatus).REJECTED}">Đã từ chối</option>
+                        <option value="CANCELLED" th:selected="${selectedStatus == T(com.library.management.enums.BorrowStatus).CANCELLED}">Đã hủy</option>
+                    </select>
+                </div>
+
+                <div class="col-lg-3 col-md-6 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-fill justify-content-center">Tìm kiếm</button>
+                    <a th:href="@{/borrows/management}" class="btn btn-outline flex-fill justify-content-center">Xóa lọc</a>
+                </div>
+            </form>
+
             <div class="table-responsive">
                 <table class="table mb-0" style="color: var(--text-primary); border-color: var(--glass-border);">
                     <thead>
                         <tr style="border-bottom: 1px solid var(--glass-border);">
-                            <th style="width: 10%; color: var(--text-secondary); border: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Mã Yêu Cầu</th>
-                            <th style="width: 25%; color: var(--text-secondary); border: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Độc Giả</th>
-                            <th style="width: 30%; color: var(--text-secondary); border: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Thông tin Sách</th>
+                            <th style="width: 8%; color: var(--text-secondary); border: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Mã Yêu Cầu</th>
+                            <th style="width: 20%; color: var(--text-secondary); border: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Độc Giả</th>
+                            <th style="width: 22%; color: var(--text-secondary); border: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Thông tin Sách</th>
                             <th style="width: 15%; color: var(--text-secondary); border: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Ngày Yêu Cầu</th>
+                            <th style="width: 17%; color: var(--text-secondary); border: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Mượn / Trả</th>
                             <th style="width: 12%; color: var(--text-secondary); border: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Trạng Thái</th>
-                            <th style="width: 8%; color: var(--text-secondary); border: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;" class="text-center">Thao Tác</th>
+                            <th style="width: 6%; color: var(--text-secondary); border: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;" class="text-center">Thao Tác</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -55,22 +83,44 @@
                                 </div>
                             </td>
                             <td style="color: var(--text-secondary); border: none;" th:text="${#temporals.format(req.requestDate, 'dd/MM/yyyy HH:mm:ss')}">28/06/2026</td>
+                            <td style="border: none;" th:with="detail0=${req.details != null and !req.details.isEmpty() ? req.details[0] : null}">
+                                <div th:if="${detail0 != null}">
+                                    <div style="font-size: 0.8rem; color: var(--text-secondary);">
+                                        <strong>Mượn:</strong> <span th:text="${detail0.borrowDate != null ? #temporals.format(detail0.borrowDate, 'dd/MM/yyyy HH:mm:ss') : '—'}">—</span>
+                                    </div>
+                                    <div style="font-size: 0.8rem; color: var(--text-secondary);">
+                                        <strong>Trả:</strong> <span th:text="${detail0.returnDate != null ? #temporals.format(detail0.returnDate, 'dd/MM/yyyy HH:mm:ss') : (detail0.dueDate != null ? #temporals.format(detail0.dueDate, 'dd/MM/yyyy HH:mm:ss') : '—')}">—</span>
+                                    </div>
+                                </div>
+                            </td>
                             <td style="border: none;">
                                 <span th:if="${req.status == T(com.library.management.enums.BorrowStatus).PENDING}"
                                       style="color: var(--accent-warning); background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600;">
                                     Chờ duyệt
                                 </span>
-                                <span th:if="${req.status == T(com.library.management.enums.BorrowStatus).APPROVED}"
-                                      style="color: var(--accent-success); background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600;">
-                                    Đã duyệt
+                                <span th:if="${req.status == T(com.library.management.enums.BorrowStatus).RESERVED}"
+                                      style="color: #a855f7; background: rgba(168,85,247,0.15); border: 1px solid rgba(168,85,247,0.3); padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600;">
+                                    Đang giữ chỗ
+                                </span>
+                                <span th:if="${req.status == T(com.library.management.enums.BorrowStatus).BORROWING}"
+                                      th:with="isOverdue=${req.details != null and !req.details.isEmpty() and req.details[0].dueDate != null and req.details[0].dueDate.isBefore(T(java.time.LocalDateTime).now())}"
+                                      th:style="${isOverdue} ? 'color: var(--accent-danger); background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600;' : 'color: var(--accent-success); background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600;'"
+                                      th:text="${isOverdue} ? 'Quá hạn' : 'Đang mượn'">
+                                    Đang mượn
                                 </span>
                                 <span th:if="${req.status == T(com.library.management.enums.BorrowStatus).REJECTED}"
                                       style="color: var(--accent-danger); background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600;">
                                     Đã từ chối
                                 </span>
                                 <span th:if="${req.status == T(com.library.management.enums.BorrowStatus).RETURNED}"
-                                      style="color: #60a5fa; background: rgba(96,165,250,0.15); border: 1px solid rgba(96,165,250,0.3); padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600;">
+                                      th:with="wasOverdue=${req.details != null and !req.details.isEmpty() and req.details[0].borrowDate != null and req.details[0].returnDate != null and T(java.time.Duration).between(req.details[0].borrowDate, req.details[0].returnDate).toMinutes() >= 5}"
+                                      th:style="${wasOverdue} ? 'color: #f59e0b; background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600;' : 'color: #60a5fa; background: rgba(96,165,250,0.15); border: 1px solid rgba(96,165,250,0.3); padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600;'"
+                                      th:text="${wasOverdue} ? 'Đã trả (Quá hạn)' : 'Đã trả sách'">
                                     Đã trả sách
+                                </span>
+                                <span th:if="${req.status == T(com.library.management.enums.BorrowStatus).CANCELLED}"
+                                      style="color: var(--text-secondary); background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600;">
+                                    Đã hủy giữ chỗ
                                 </span>
                             </td>
                             <td class="text-center" style="border: none;">
@@ -81,10 +131,10 @@
                         </tr>
                         <!-- Empty State -->
                         <tr th:if="${#lists.isEmpty(requests)}">
-                            <td colspan="6" class="text-center py-5" style="border: none;">
+                            <td colspan="7" class="text-center py-5" style="border: none;">
                                 <div class="empty-state" style="padding: 2rem 1rem;">
                                     <div class="empty-state-icon" style="font-size: 2.5rem;">📋</div>
-                                    <h3 style="margin-top: 1rem;">Chưa có yêu cầu mượn sách nào trong hệ thống</h3>
+                                    <h3 style="margin-top: 1rem;">Không tìm thấy yêu cầu mượn phù hợp</h3>
                                 </div>
                             </td>
                         </tr>

@@ -17,25 +17,16 @@ public class Fine extends BaseEntity{
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
 
-
-
     @OneToOne
     @JoinColumn(name="borrow_detail_id")
     private BorrowDetail borrowDetail;
 
-
-
     private Double amount;
 
-
-
+    @Column(columnDefinition = "Nvarchar(255)")
     private String reason;
 
-
-
     private Boolean paid;
-
-
 
     private LocalDateTime paidAt;
 

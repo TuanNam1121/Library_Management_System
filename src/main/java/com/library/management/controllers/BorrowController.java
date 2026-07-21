@@ -3,6 +3,7 @@ package com.library.management.controllers;
 import com.library.management.dto.LoginedUserDTO;
 import com.library.management.entities.BorrowDetail;
 import com.library.management.entities.BorrowRequest;
+import com.library.management.enums.BorrowStatus;
 import com.library.management.services.BorrowService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -12,9 +13,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Controller
@@ -24,7 +28,6 @@ public class BorrowController {
 
     private final BorrowService borrowService;
 
-    // UC04 - Reader Submit Borrow Request
     @PostMapping("/request/{bookId}")
     public String submitBorrowRequest(@PathVariable Long bookId, HttpSession session) {
         String loggedInUser = (String) session.getAttribute("loggedInUser");
@@ -44,7 +47,6 @@ public class BorrowController {
         }
     }
 
-    // UC05 - Reader View Borrow History
     @GetMapping("/history")
     public String viewBorrowHistory(HttpSession session, Model model) {
         String loginUser = (String) session.getAttribute("loggedInUser");
@@ -61,7 +63,6 @@ public class BorrowController {
         return "borrows/history";
     }
 
-    // UC05b - Reader View Overdue Books
     @GetMapping("/overdue")
     public String viewOverdueBooks(HttpSession session, Model model) {
         String loginUser = (String) session.getAttribute("loggedInUser");
@@ -78,7 +79,6 @@ public class BorrowController {
         return "borrows/overdue";
     }
 
-    // UC06 - Librarian View Pending Borrow Requests
     @GetMapping("/requests")
     public String viewPendingRequests(HttpSession session, Model model) {
         String loginUser = (String) session.getAttribute("loggedInUser");
@@ -95,9 +95,13 @@ public class BorrowController {
         return "borrows/requests";
     }
 
-    // UC06 - Librarian View All Borrow Requests
     @GetMapping("/management")
-    public String viewAllRequests(HttpSession session, Model model) {
+    public String viewAllRequests(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) BorrowStatus status,
+            HttpSession session,
+            Model model
+    ) {
         String loginUser = (String) session.getAttribute("loggedInUser");
         String userRole = (String) session.getAttribute("userRole");
         if (loginUser == null) {
@@ -107,12 +111,13 @@ public class BorrowController {
             return "redirect:/books";
         }
 
-        List<BorrowRequest> requests = borrowService.getAllRequests();
+        List<BorrowRequest> requests = borrowService.searchRequests(keyword, status);
         model.addAttribute("requests", requests);
+        model.addAttribute("keyword", keyword == null ? "" : keyword.trim());
+        model.addAttribute("selectedStatus", status);
         return "borrows/management";
     }
 
-    // UC06 - Librarian View Borrow Details
     @GetMapping("/{id}")
     public String viewBorrowDetails(@PathVariable Long id, HttpSession session, Model model) {
         String loginUser = (String) session.getAttribute("loggedInUser");
@@ -128,11 +133,23 @@ public class BorrowController {
             return "redirect:/books";
         }
 
+        // Tính số giây còn lại của thời gian giữ chỗ (server-side)
+        if (request.getStatus() == BorrowStatus.RESERVED
+                && request.getDetails() != null
+                && !request.getDetails().isEmpty()
+                && request.getDetails().get(0).getReservedAt() != null) {
+            LocalDateTime reservedAt = request.getDetails().get(0).getReservedAt();
+            LocalDateTime expireAt = reservedAt.plusMinutes(1);
+            long secondsLeft = Duration.between(LocalDateTime.now(), expireAt).getSeconds();
+            model.addAttribute("reservationSecondsLeft", secondsLeft);
+        } else {
+            model.addAttribute("reservationSecondsLeft", null);
+        }
+
         model.addAttribute("request", request);
         return "borrows/detail";
     }
 
-    // UC06 - Librarian Approve Request
     @PostMapping("/{id}/approve")
     public String approveRequest(@PathVariable Long id, HttpSession session) {
         String loginUser = (String) session.getAttribute("loggedInUser");
@@ -152,7 +169,6 @@ public class BorrowController {
         }
     }
 
-    // UC06 - Librarian Reject Request
     @PostMapping("/{id}/reject")
     public String rejectRequest(@PathVariable Long id, HttpSession session) {
         String loginUser = (String) session.getAttribute("loggedInUser");
@@ -172,7 +188,44 @@ public class BorrowController {
         }
     }
 
-    // UC07 - Librarian Record Return
+    @PostMapping("/{id}/confirm-pickup")
+    public String confirmPickup(@PathVariable Long id, HttpSession session) {
+        String loginUser = (String) session.getAttribute("loggedInUser");
+        String userRole = (String) session.getAttribute("userRole");
+        if (loginUser == null) {
+            return "redirect:/auths/login";
+        }
+        if (!"LIBRARIAN".equals(userRole)) {
+            return "redirect:/books";
+        }
+
+        try {
+            borrowService.confirmPickup(id, loginUser);
+            return "redirect:/borrows/" + id + "?success=pickupConfirmed";
+        } catch (RuntimeException ex) {
+            return "redirect:/borrows/" + id + "?error=" + URLEncoder.encode(ex.getMessage(), StandardCharsets.UTF_8);
+        }
+    }
+
+    @PostMapping("/{id}/cancel")
+    public String cancelReservation(@PathVariable Long id, HttpSession session) {
+        String loginUser = (String) session.getAttribute("loggedInUser");
+        String userRole = (String) session.getAttribute("userRole");
+        if (loginUser == null) {
+            return "redirect:/auths/login";
+        }
+        if (!"LIBRARIAN".equals(userRole)) {
+            return "redirect:/books";
+        }
+
+        try {
+            borrowService.cancelReservation(id, loginUser);
+            return "redirect:/borrows/" + id + "?success=reservationCancelled";
+        } catch (RuntimeException ex) {
+            return "redirect:/borrows/" + id + "?error=" + URLEncoder.encode(ex.getMessage(), StandardCharsets.UTF_8);
+        }
+    }
+
     @PostMapping("/{id}/return")
     public String recordReturn(@PathVariable Long id, HttpSession session) {
         String loginUser = (String) session.getAttribute("loggedInUser");
@@ -196,7 +249,6 @@ public class BorrowController {
         }
     }
 
-    // UC07 - Librarian Confirm Payment
     @PostMapping("/{id}/pay-fine")
     public String payFine(@PathVariable Long id, HttpSession session) {
         String loginUser = (String) session.getAttribute("loggedInUser");

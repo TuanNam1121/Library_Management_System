@@ -5,7 +5,14 @@ public enum BorrowStatus {
 
     APPROVED,
 
+    RESERVED,
+
+    BORROWING,
+
     REJECTED,
 
-    RETURNED
+    RETURNED,
+
+    CANCELLED
 }
+
