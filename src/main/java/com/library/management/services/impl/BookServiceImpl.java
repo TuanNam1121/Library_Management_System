@@ -81,6 +81,8 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BookReturnDTO createBook(BookFormDTO formDTO) {
+        validateBookForm(formDTO, null);
+
         Book book = new Book();
         book.setTitle(formDTO.getTitle());
         book.setIsbn(formDTO.getIsbn());
@@ -103,6 +105,8 @@ public class BookServiceImpl implements BookService {
                 .filter(b -> Boolean.FALSE.equals(b.getIsDeleted()))
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy sách với id: " + id));
 
+        validateBookForm(formDTO, id);
+
         book.setTitle(formDTO.getTitle());
         book.setIsbn(formDTO.getIsbn());
         book.setDescription(formDTO.getDescription());
@@ -122,6 +126,12 @@ public class BookServiceImpl implements BookService {
                 .filter(b -> Boolean.FALSE.equals(b.getIsDeleted()))
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy sách với id: " + id));
 
+        if (book.getQuantity() != null && book.getAvailableQuantity() != null
+                && book.getAvailableQuantity() < book.getQuantity()) {
+            int borrowedCount = book.getQuantity() - book.getAvailableQuantity();
+            throw new IllegalArgumentException("Không thể xóa sách vì đang có " + borrowedCount + " bản được độc giả mượn chưa trả!");
+        }
+
         book.setIsDeleted(true);
         book.setDeletedAt(LocalDateTime.now());
         bookRepository.save(book);
@@ -137,11 +147,44 @@ public class BookServiceImpl implements BookService {
         return bookRepository.findByAuthor(id);
     }
 
-    // ---- Helpers ----
+    private void validateBookForm(BookFormDTO formDTO, Long currentBookId) {
+        if (formDTO == null) {
+            throw new IllegalArgumentException("Dữ liệu sách không được để trống!");
+        }
+
+        if (formDTO.getTitle() == null || formDTO.getTitle().isBlank()) {
+            throw new IllegalArgumentException("Tên sách không được để trống!");
+        }
+
+        if (formDTO.getQuantity() == null || formDTO.getQuantity() < 0) {
+            throw new IllegalArgumentException("Tổng số bản phải lớn hơn hoặc bằng 0!");
+        }
+        if (formDTO.getAvailableQuantity() == null || formDTO.getAvailableQuantity() < 0) {
+            throw new IllegalArgumentException("Số bản có thể mượn phải lớn hơn hoặc bằng 0!");
+        }
+        if (formDTO.getAvailableQuantity() > formDTO.getQuantity()) {
+            throw new IllegalArgumentException("Số bản có thể mượn (" + formDTO.getAvailableQuantity() 
+                    + ") không được lớn hơn tổng số bản (" + formDTO.getQuantity() + ")!");
+        }
+
+        if (formDTO.getIsbn() != null && !formDTO.getIsbn().isBlank()) {
+            String trimmedIsbn = formDTO.getIsbn().trim();
+            if (currentBookId == null) {
+                if (bookRepository.existsByIsbn(trimmedIsbn)) {
+                    throw new IllegalArgumentException("Mã ISBN \"" + trimmedIsbn + "\" đã tồn tại trong hệ thống!");
+                }
+            } else {
+                if (bookRepository.existsByIsbnAndIdNot(trimmedIsbn, currentBookId)) {
+                    throw new IllegalArgumentException("Mã ISBN \"" + trimmedIsbn + "\" đã thuộc về một cuốn sách khác!");
+                }
+            }
+        }
+    }
 
     private void applyCategory(Book book, Long categoryId) {
         if (categoryId != null && categoryId > 0) {
-            Category category = categoryRepository.findByIdAndIsDeletedFalse(categoryId).orElse(null);
+            Category category = categoryRepository.findByIdAndIsDeletedFalse(categoryId)
+                    .orElseThrow(() -> new EntityNotFoundException("Thể loại được chọn không tồn tại!"));
             book.setCategory(category);
         } else {
             book.setCategory(null);
@@ -150,7 +193,8 @@ public class BookServiceImpl implements BookService {
 
     private void applyAuthor(Book book, Long authorId) {
         if (authorId != null && authorId > 0) {
-            Author author = authorRepository.findById(authorId).orElse(null);
+            Author author = authorRepository.findById(authorId)
+                    .orElseThrow(() -> new EntityNotFoundException("Tác giả được chọn không tồn tại!"));
             book.setAuthor(author);
         } else {
             book.setAuthor(null);
@@ -164,10 +208,8 @@ public class BookServiceImpl implements BookService {
             }
             book.setCoverImage(fileStorageService.saveFile(file));
         }
-        // If no new file provided, keep existing image unchanged
     }
 
-    // ---- Mapping helper ----
     private BookReturnDTO toDTO(Book book) {
         BookReturnDTO dto = new BookReturnDTO();
         dto.setId(book.getId());
