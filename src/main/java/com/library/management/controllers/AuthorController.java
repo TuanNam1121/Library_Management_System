@@ -17,8 +17,13 @@ public class AuthorController {
     private final BookService bookService;
 
     @GetMapping
-    public String list(Model model){
+    public String list(Model model, @RequestParam(name = "keyword",defaultValue = "")String keyword){
 
+        if(keyword!= null || !keyword.isBlank()){
+            model.addAttribute("authors", authorService.searchByName(keyword));
+            model.addAttribute("keyword", keyword);
+            return "authors/list";
+        }
         model.addAttribute("authors", authorService.findAll());
 
         return "authors/list";
