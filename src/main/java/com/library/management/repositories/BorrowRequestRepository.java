@@ -7,6 +7,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.util.List;
@@ -20,7 +22,7 @@ public interface BorrowRequestRepository extends JpaRepository<BorrowRequest, Lo
     @Query("""
         SELECT DISTINCT br
         FROM BorrowRequest br
-        LEFT JOIN br.details bd
+        JOIN br.details bd
         LEFT JOIN bd.book b
         WHERE (:status IS NULL OR br.status = :status)
           AND (
@@ -33,11 +35,8 @@ public interface BorrowRequestRepository extends JpaRepository<BorrowRequest, Lo
           )
         ORDER BY br.requestDate DESC
     """)
-    List<BorrowRequest> searchManagementRequests(
-            @Param("keyword") String keyword,
-            @Param("requestId") Long requestId,
-            @Param("status") BorrowStatus status
-    );
+    Page<BorrowRequest> searchManagementRequests(@Param("keyword") String keyword, @Param("requestId") Long requestId,
+                                                 @Param("status") BorrowStatus status, Pageable pageable);
 
     @Query("""
         SELECT COUNT(br) > 0 
@@ -46,5 +45,6 @@ public interface BorrowRequestRepository extends JpaRepository<BorrowRequest, Lo
           AND bd.book.id = :bookId 
           AND br.status IN :statuses
     """)
-    boolean existsActiveBorrowRequest(@Param("username") String username, @Param("bookId") Long bookId, @Param("statuses") List<BorrowStatus> statuses);
+    boolean existsActiveBorrowRequest(@Param("username") String username, @Param("bookId") Long bookId,
+                                      @Param("statuses") List<BorrowStatus> statuses);
 }

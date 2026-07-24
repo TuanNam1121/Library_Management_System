@@ -56,7 +56,7 @@ public class BookController {
             model.addAttribute("book", book);
             return "books/detail";
         } catch (EntityNotFoundException e) {
-            return "redirect:/books?error=notfound";
+            return "redirect:/books";
         }
     }
 

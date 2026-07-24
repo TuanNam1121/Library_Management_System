@@ -31,7 +31,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
             SELECT b FROM Book b
             WHERE (b.isDeleted = false OR b.isDeleted IS NULL)
               AND b.status = com.library.management.enums.BookStatus.APPROVED
-              AND (CAST(:keyword AS string) IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', CAST(:keyword AS string), '%')))
+              AND (:keyword IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')))
               AND (:authorId IS NULL OR b.author.id = :authorId)
               AND (:categoryId IS NULL OR b.category.id = :categoryId)
             """)

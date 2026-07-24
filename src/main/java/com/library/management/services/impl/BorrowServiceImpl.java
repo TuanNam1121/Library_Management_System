@@ -15,6 +15,8 @@ import com.library.management.services.BorrowService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -100,11 +102,9 @@ public class BorrowServiceImpl implements BorrowService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BorrowRequest> searchRequests(String keyword, BorrowStatus status) {
+    public Page<BorrowRequest> searchRequests(String keyword, BorrowStatus status, Pageable pageable) {
         String normalizedKeyword = keyword == null ? "" : keyword.trim();
-        String numericKeyword = normalizedKeyword.startsWith("#")
-                ? normalizedKeyword.substring(1).trim()
-                : normalizedKeyword;
+        String numericKeyword = normalizedKeyword.startsWith("#") ? normalizedKeyword.substring(1).trim() : normalizedKeyword;
 
         Long requestId = -1L;
         try {
@@ -115,7 +115,8 @@ public class BorrowServiceImpl implements BorrowService {
         return borrowRequestRepository.searchManagementRequests(
                 normalizedKeyword,
                 requestId,
-                status
+                status,
+                pageable
         );
     }
 
@@ -141,12 +142,6 @@ public class BorrowServiceImpl implements BorrowService {
         if (request.getDetails() != null) {
             for (BorrowDetail detail : request.getDetails()) {
                 Book book = detail.getBook();
-                if (Boolean.TRUE.equals(book.getIsDeleted())) {
-                    throw new RuntimeException("Sách '" + book.getTitle() + "' đã bị xóa khỏi hệ thống");
-                }
-                if (book.getAvailableQuantity() == null || book.getAvailableQuantity() <= 0) {
-                    throw new BorrowOperationException(requestId, "Sách '" + book.getTitle() + "' đã hết, không thể phê duyệt");
-                }
                 book.setAvailableQuantity(book.getAvailableQuantity() - 1);
                 bookRepository.save(book);
 
@@ -177,7 +172,6 @@ public class BorrowServiceImpl implements BorrowService {
         if (request.getDetails() != null) {
             for (BorrowDetail detail : request.getDetails()) {
                 detail.setBorrowDate(LocalDateTime.now());
-                // detail.setDueDate(LocalDateTime.now().plusDays(5));
                 detail.setDueDate(LocalDateTime.now().plusMinutes(5));
                 detail.setStatus(BorrowItemStatus.BORROWING);
             }
@@ -253,7 +247,7 @@ public class BorrowServiceImpl implements BorrowService {
                 // Calculate fine
                 long overdue = Duration.between(detail.getDueDate(), now).toMinutes();
                 if (overdue > 0) {
-                    double fineAmount = overdue * 1000.0;
+                    double fineAmount = overdue * 10000.0;
 
                     Fine fine = new Fine();
                     fine.setBorrowDetail(detail);
@@ -269,10 +263,10 @@ public class BorrowServiceImpl implements BorrowService {
                     hasFine = true;
                 } else {
                     detail.setStatus(BorrowItemStatus.RETURNED);
-                    Book book = detail.getBook();
-                    book.setAvailableQuantity(book.getAvailableQuantity() + 1);
-                    bookRepository.save(book);
                 }
+                Book book = detail.getBook();
+                book.setAvailableQuantity(book.getAvailableQuantity() + 1);
+                bookRepository.save(book);
             }
         }
 
@@ -289,10 +283,6 @@ public class BorrowServiceImpl implements BorrowService {
         BorrowRequest request = borrowRequestRepository.findById(requestId)
                 .orElseThrow(() -> new BorrowOperationException(requestId, "Không tìm thấy yêu cầu mượn với id: " + requestId));
 
-        if (request.getStatus() != BorrowStatus.BORROWING) {
-            throw new BorrowOperationException(requestId, "Yêu cầu mượn này không ở trạng thái đang mượn để thanh toán phạt");
-        }
-
         if (request.getDetails() != null) {
             for (BorrowDetail detail : request.getDetails()) {
                 Fine fine = detail.getFine();
@@ -300,11 +290,6 @@ public class BorrowServiceImpl implements BorrowService {
                     fine.setPaid(true);
                     fine.setPaidAt(LocalDateTime.now());
                     fineRepository.save(fine);
-
-                    detail.setStatus(BorrowItemStatus.RETURNED);
-                    Book book = detail.getBook();
-                    book.setAvailableQuantity(book.getAvailableQuantity() + 1);
-                    bookRepository.save(book);
                 }
             }
         }
