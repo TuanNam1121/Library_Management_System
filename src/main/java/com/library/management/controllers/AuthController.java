@@ -14,6 +14,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.Objects;
+
 @Controller
 @RequestMapping("/auths")
 @RequiredArgsConstructor
@@ -31,6 +33,8 @@ public class AuthController {
     public String register(
             @Valid @ModelAttribute("user") RegisterRequestDTO dto,
             BindingResult result, RedirectAttributes redirectAttributes) {
+
+
 
         if (result.hasErrors()) {
             return "auths/register";
@@ -84,6 +88,6 @@ public class AuthController {
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
-        return "redirect:/auths/login";
+        return "redirect:/";
     }
 }

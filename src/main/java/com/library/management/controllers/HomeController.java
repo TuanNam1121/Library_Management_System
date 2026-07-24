@@ -14,7 +14,10 @@ public class HomeController {
 
     @GetMapping
     public String homepage(Model model, HttpSession session){
-        return "home/landing";
+        if(session.getAttribute("loggedInUser") != null){
+            return "redirect:/books";
+        }else
+            return "home/landing";
     }
 
 }
