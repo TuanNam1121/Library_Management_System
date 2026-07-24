@@ -2,6 +2,7 @@ package com.library.management.exception.handle;
 
 import com.library.management.controllers.AuthController;
 import com.library.management.dto.RegisterRequestDTO;
+import com.library.management.exception.ComfirmPasswordNotMatchException;
 import com.library.management.exception.GmailAlreadyExistException;
 import com.library.management.exception.UsernameAlreadyExistException;
 import org.springframework.ui.Model;
@@ -13,7 +14,8 @@ public class RegisterGloblaException {
 
     @ExceptionHandler({
             UsernameAlreadyExistException.class,
-            GmailAlreadyExistException.class
+            GmailAlreadyExistException.class,
+            ComfirmPasswordNotMatchException.class
     })
     public String handleException(RuntimeException ex, Model model) {
         model.addAttribute("registerError", ex.getMessage());
