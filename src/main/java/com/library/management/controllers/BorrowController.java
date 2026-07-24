@@ -14,6 +14,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -277,7 +279,7 @@ public class BorrowController {
             }
             return "redirect:/borrows/" + id + "?success=emailSent";
         } catch (RuntimeException ex) {
-            return "redirect:/borrows/" + id + "?error=" + URLEncoder.encode(ex.getMessage(), StandardCharsets.UTF_8);
+            return "redirect:/borrows/" + id + "?error=true";
         }
     }
 }

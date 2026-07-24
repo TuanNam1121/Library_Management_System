@@ -32,28 +32,13 @@ public class EmailServiceImpl implements EmailService {
             throw new RuntimeException("Độc giả " + readerName + " chưa có email, không thể gửi thông báo.");
         }
 
-        LocalDateTime now = LocalDateTime.now();
-        Duration overdueDuration = Duration.between(detail.getDueDate(), now);
-        long overdueDays = overdueDuration.toDays();
-        long overdueHours = overdueDuration.toHours() % 24;
-        long overdueMinutes = overdueDuration.toMinutes() % 60;
-
-        String overdueText;
-        if (overdueDays > 0) {
-            overdueText = overdueDays + " ngày " + overdueHours + " giờ " + overdueMinutes + " phút";
-        } else if (overdueHours > 0) {
-            overdueText = overdueHours + " giờ " + overdueMinutes + " phút";
-        } else {
-            overdueText = overdueMinutes + " phút";
-        }
-
         String textContent = "Xin chào " + readerName + ",\n\n"
                 + "Đây là thông báo nhắc nhở từ thư viện. Cuốn sách bạn đang mượn đã quá hạn trả.\n\n"
                 + "Thông tin sách mượn:\n"
                 + "- Tên sách: " + bookTitle + "\n"
                 + "- ISBN: " + detail.getBook().getIsbn() + "\n"
                 + "- Mã yêu cầu: #" + detail.getBorrowRequest().getId() + "\n"
-                + "- Quá hạn: " + overdueText + "\n\n"
+                + "- Ngày hạn: " + detail.getDueDate() + "\n\n"
                 + "Việc trả sách quá hạn sẽ bị tính phí phạt theo quy định của thư viện.\n"
                 + "Vui lòng mang sách đến quầy thủ thư để hoàn tất thủ tục trả sách sớm nhất có thể.\n\n"
                 + "Trân trọng,\nLibraryHub";
