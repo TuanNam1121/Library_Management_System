@@ -30,13 +30,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public void register(RegisterRequestDTO registerRequest) {
         if (userRepository.existsByUsername(registerRequest.getUsername())) {
-            throw new UsernameAlreadyExistException("Username already exist ");
+            throw new UsernameAlreadyExistException("Username đã tồn tại");
         }
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
-            throw new GmailAlreadyExistException("Gmail already exist ");
+            throw new GmailAlreadyExistException("Gmail đã tồn tại");
         }
         if (!(registerRequest.getPassword().equals(registerRequest.getConfirmPassword()))) {
-            throw new ComfirmPasswordNotMatchException("Confirm password does not match password");
+            throw new ComfirmPasswordNotMatchException("Confirm password không đúng");
         }
 
         User user = new User();
