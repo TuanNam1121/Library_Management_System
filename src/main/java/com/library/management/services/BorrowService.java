@@ -4,6 +4,9 @@ import com.library.management.entities.BorrowDetail;
 import com.library.management.entities.BorrowRequest;
 import com.library.management.enums.BorrowStatus;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 
 public interface BorrowService {
@@ -12,7 +15,7 @@ public interface BorrowService {
     List<BorrowDetail> getOverdueBooks(String username);
     List<BorrowRequest> getPendingRequests();
     List<BorrowRequest> getAllRequests();
-    List<BorrowRequest> searchRequests(String keyword, BorrowStatus status);
+    Page<BorrowRequest> searchRequests(String keyword, BorrowStatus status, Pageable pageable);
     BorrowRequest getRequestById(Long id);
     void approveRequest(Long requestId, String librarianUsername);
     void rejectRequest(Long requestId, String librarianUsername);

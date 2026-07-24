@@ -113,11 +113,10 @@
                                     Đã từ chối
                                 </span>
                                 <span th:if="${req.status == T(com.library.management.enums.BorrowStatus).RETURNED}"
-                                      th:with="wasOverdue=${req.details != null and !req.details.isEmpty() and req.details[0].borrowDate != null and req.details[0].returnDate != null and T(java.time.Duration).between(req.details[0].borrowDate, req.details[0].returnDate).toMinutes() >= 5}"
-                                      th:style="${wasOverdue} ? 'color: #f59e0b; background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600;' : 'color: #60a5fa; background: rgba(96,165,250,0.15); border: 1px solid rgba(96,165,250,0.3); padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600;'"
-                                      th:text="${wasOverdue} ? 'Đã trả (Quá hạn)' : 'Đã trả sách'">
+                                      style="color: #60a5fa;background: rgba(96,165,250,0.15);border: 1px solid rgba(96,165,250,0.3);padding: 0.25rem 0.6rem;border-radius: 999px; font-size: 0.75rem; font-weight: 600;">
                                     Đã trả sách
                                 </span>
+
                                 <span th:if="${req.status == T(com.library.management.enums.BorrowStatus).CANCELLED}"
                                       style="color: var(--text-secondary); background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600;">
                                     Đã hủy giữ chỗ
@@ -152,6 +151,25 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Pagination -->
+            <nav th:if="${totalPages > 1}" class="mt-4" aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link" th:href="@{/borrows/management(page=${currentPage - 1}, keyword=${keyword}, status=${selectedStatus})}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${currentPage == i} ? 'active'">
+                        <a class="page-link" th:href="@{/borrows/management(page=${i}, keyword=${keyword}, status=${selectedStatus})}" th:text="${i + 1}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                        <a class="page-link" th:href="@{/borrows/management(page=${currentPage + 1}, keyword=${keyword}, status=${selectedStatus})}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
         </div>
 
     </div>

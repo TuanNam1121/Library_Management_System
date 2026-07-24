@@ -11,8 +11,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -99,6 +100,7 @@ public class BorrowController {
     public String viewAllRequests(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) BorrowStatus status,
+            @RequestParam(defaultValue = "0") int page,
             HttpSession session,
             Model model
     ) {
@@ -110,11 +112,14 @@ public class BorrowController {
         if (!"LIBRARIAN".equals(userRole)) {
             return "redirect:/books";
         }
-
-        List<BorrowRequest> requests = borrowService.searchRequests(keyword, status);
-        model.addAttribute("requests", requests);
+        int pageSize = 10;
+        Pageable pageable = PageRequest.of(page, pageSize);
+        Page<BorrowRequest> requestPage = borrowService.searchRequests(keyword, status, pageable);
+        model.addAttribute("requests", requestPage.getContent());
         model.addAttribute("keyword", keyword == null ? "" : keyword.trim());
         model.addAttribute("selectedStatus", status);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", requestPage.getTotalPages());
         return "borrows/management";
     }
 

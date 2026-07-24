@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class RenewRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
