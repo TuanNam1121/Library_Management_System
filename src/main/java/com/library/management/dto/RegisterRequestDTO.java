@@ -21,6 +21,10 @@ public class RegisterRequestDTO {
     @Size(min = 6, max = 50)
     private String password;
 
+    @NotBlank
+    @Size(min = 6, max = 50)
+    private String confirmPassword;
+
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")
     @Size(min = 5, max = 100)

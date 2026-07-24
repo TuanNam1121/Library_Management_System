@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -40,6 +41,10 @@ public class UserServiceImpl implements UserService {
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
             throw new GmailAlreadyExistException("Gmail already exist ");
         }
+        if (!(registerRequest.getPassword().equals(registerRequest.getConfirmPassword()))) {
+            throw new ComfirmPasswordNotMatchException("Confirm password does not match password");
+        }
+
         User user = new User();
         user.setUsername(registerRequest.getUsername());
         user.setEmail(registerRequest.getEmail());
