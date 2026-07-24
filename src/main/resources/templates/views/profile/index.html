@@ -87,7 +87,7 @@
                             <label class="form-label">Ảnh đại diện</label>
                             <div class="avatar-upload-area" id="avatarUploadArea">
                                 <input type="file" id="avatarFileInput" name="avatarFile"
-                                       accept="image/*" style="display:none"/>
+                                       accept="image/png,image/jpeg,image/gif" style="display:none"/>
                                 <div class="upload-placeholder" id="uploadPlaceholder">
                                     <div class="upload-icon"></div>
                                     <p>Nhấp để chọn ảnh hoặc kéo thả vào đây</p>
@@ -98,6 +98,7 @@
                                      th:src="${user.avatar}"
                                      class="avatar-preview-img" alt="Preview"/>
                             </div>
+                            <div id="avatarFileError" class="text-danger"></div>
                         </div>
 
                         <div class="form-row-2">
@@ -232,8 +233,11 @@
     // --- Avatar Upload Preview ---
     const uploadArea = document.getElementById('avatarUploadArea');
     const fileInput = document.getElementById('avatarFileInput');
-    const preview = document.getElementById('avatarPreview');
+    let preview = document.getElementById('avatarPreview');
     const placeholder = document.getElementById('uploadPlaceholder');
+    const avatarFileError = document.getElementById('avatarFileError');
+    const maxAvatarSize = 5 * 1024 * 1024;
+    const allowedAvatarTypes = ['image/jpeg', 'image/png', 'image/gif'];
 
     uploadArea.addEventListener('click', () => fileInput.click());
     uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('drag-over'); });
@@ -242,11 +246,34 @@
         e.preventDefault();
         uploadArea.classList.remove('drag-over');
         const file = e.dataTransfer.files[0];
-        if (file) showPreview(file);
+        if (file && validateAvatar(file)) {
+            const transfer = new DataTransfer();
+            transfer.items.add(file);
+            fileInput.files = transfer.files;
+            showPreview(file);
+        }
     });
     fileInput.addEventListener('change', () => {
-        if (fileInput.files[0]) showPreview(fileInput.files[0]);
+        const file = fileInput.files[0];
+        if (file && validateAvatar(file)) {
+            showPreview(file);
+        } else {
+            fileInput.value = '';
+        }
     });
+
+    function validateAvatar(file) {
+        if (!allowedAvatarTypes.includes(file.type)) {
+            avatarFileError.textContent = 'Chỉ chấp nhận ảnh JPG, PNG hoặc GIF.';
+            return false;
+        }
+        if (file.size > maxAvatarSize) {
+            avatarFileError.textContent = 'Ảnh đại diện không được vượt quá 5MB.';
+            return false;
+        }
+        avatarFileError.textContent = '';
+        return true;
+    }
 
     function showPreview(file) {
         const reader = new FileReader();
@@ -260,6 +287,7 @@
                 img.className = 'avatar-preview-img';
                 img.id = 'avatarPreview';
                 uploadArea.appendChild(img);
+                preview = img;
             }
             if (placeholder) placeholder.style.display = 'none';
         };

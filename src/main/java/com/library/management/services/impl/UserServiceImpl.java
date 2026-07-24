@@ -10,21 +10,14 @@ import com.library.management.entities.User;
 import com.library.management.exception.*;
 import com.library.management.repositories.RoleRepository;
 import com.library.management.repositories.UserRepository;
+import com.library.management.services.FileStorageService;
 import com.library.management.services.UserService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
 
 @Service
 @Transactional
@@ -32,6 +25,7 @@ import java.util.UUID;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final FileStorageService fileStorageService;
 
     @Override
     public void register(RegisterRequestDTO registerRequest) {
@@ -85,18 +79,41 @@ public class UserServiceImpl implements UserService {
     public void updateProfile(String username, UpdateProfileDTO dto) {
         User user = getByUsername(username);
 
-
         if (dto.getPhone() != null) user.setPhone(dto.getPhone());
         if (dto.getAddress() != null) user.setAddress(dto.getAddress());
 
-        // Handle avatar upload
         MultipartFile avatarFile = dto.getAvatarFile();
         if (avatarFile != null && !avatarFile.isEmpty()) {
-            String avatarUrl = saveAvatar(avatarFile, username);
-            user.setAvatar(avatarUrl);
+            updateAvatar(user, avatarFile);
+            return;
         }
 
         userRepository.save(user);
+    }
+
+    private void updateAvatar(User user, MultipartFile avatarFile) {
+        String oldAvatarUrl = user.getAvatar();
+        String newAvatarUrl;
+
+        try {
+            newAvatarUrl = fileStorageService.saveFile(avatarFile, "avatars");
+        } catch (RuntimeException ex) {
+            throw new CanNotSaveAvartaException(ex.getMessage());
+        }
+
+        user.setAvatar(newAvatarUrl);
+        try {
+            userRepository.saveAndFlush(user);
+        } catch (RuntimeException ex) {
+            fileStorageService.deleteFile(newAvatarUrl);
+            throw ex;
+        }
+
+        if (oldAvatarUrl != null
+                && !oldAvatarUrl.isBlank()
+                && !oldAvatarUrl.equals(newAvatarUrl)) {
+            fileStorageService.deleteFile(oldAvatarUrl);
+        }
     }
 
     @Override
@@ -111,28 +128,6 @@ public class UserServiceImpl implements UserService {
         }
         user.setPassword(dto.getNewPassword());
         userRepository.save(user);
-    }
-
-    private String saveAvatar(MultipartFile file, String username) {
-        try {
-            // Save to static/uploads/avatars/
-            String uploadDir = "src/main/resources/static/uploads/avatars";
-            Path uploadPath = Paths.get(uploadDir);
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
-            }
-
-            String originalName = StringUtils.cleanPath(file.getOriginalFilename());
-            String ext = originalName.contains(".") ? originalName.substring(originalName.lastIndexOf(".")) : ".jpg";
-            String fileName = username + "_" + UUID.randomUUID().toString().substring(0, 8) + ext;
-
-            Path filePath = uploadPath.resolve(fileName);
-            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-            return "/uploads/avatars/" + fileName;
-        } catch (IOException e) {
-            throw new CanNotSaveAvartaException("Không thể lưu ảnh đại diện: " + e.getMessage());
-        }
     }
 
     @Override
