@@ -80,7 +80,6 @@
                 <strong th:if="${borrowSuccess == 'paid'}">✅ Đã hoàn tất thanh toán tiền phạt quá hạn và nhận lại
                     sách.</strong>
                 <strong th:if="${param.success[0] == 'emailSent'}">📧 Đã gửi email nhắc nhở trả sách quá hạn đến độc giả thành công!</strong>
-                <strong th:if="${param.error}">📧 Email nhắc nhở trả sách quá hạn đến độc giả đã bị lỗi! Hãy thử lại!</strong>
             </div>
             <!-- Alert riêng khi trả sách nhưng có phí phạt cần nộp -->
             <div th:if="${borrowSuccess != null and borrowSuccess == 'returnedWithFine'}" class="alert"

@@ -41,4 +41,9 @@ public class AuthorServiceImpl implements AuthorService {
         }
     }
 
+    @Override
+    public List<Author> searchByName(String keyword) {
+        return authorRepository.searchByName(keyword);
+    }
+
 }
